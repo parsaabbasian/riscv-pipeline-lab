@@ -17,7 +17,7 @@ export interface Module { id: string; n: number; title: string; slides: string; 
 export const MODULES: Module[] = [
   {
     id: 'm1', n: 1, title: 'CPU Basics & Instruction Execution', slides: '1–3',
-    blurb: 'What a CPU does with one instruction: fetch it with the PC, read registers, use the ALU, maybe touch memory, then pick the next PC.',
+    blurb: "What a processor actually does with one instruction: read it, find the numbers it needs, do the math, and move on to the next one.",
     topics: [
       {
         id: 'm1-cpu', title: 'What is a CPU and an instruction?', slides: '1–2', background: true,
@@ -63,7 +63,7 @@ export const MODULES: Module[] = [
   },
   {
     id: 'm2', n: 2, title: 'CPU Overview, Multiplexers & Control', slides: '4–6',
-    blurb: 'The big picture of the CPU, why wires cannot just be joined, and how a control unit chooses what happens.',
+    blurb: "A bird’s-eye map of the whole processor, plus the two ideas that make it flexible: switches that choose between wires, and a “boss” unit that tells every part what to do.",
     topics: [
       {
         id: 'm2-overview', title: 'CPU overview', slides: '4',
@@ -108,7 +108,7 @@ export const MODULES: Module[] = [
   },
   {
     id: 'm3', n: 3, title: 'Digital Logic, Registers & Clocks', slides: '7–11',
-    blurb: 'Bits on wires, combinational vs sequential elements, edge-triggered registers, write enable and the clocking methodology.',
+    blurb: "The building blocks: how 0s and 1s travel on wires, parts that calculate, parts that remember, and the clock that keeps everything in step.",
     topics: [
       {
         id: 'm3-bits', title: 'Information encoding: bits and buses', slides: '7', background: false,
@@ -166,7 +166,7 @@ export const MODULES: Module[] = [
   },
   {
     id: 'm4', n: 4, title: 'Building the RISC-V Datapath', slides: '12–20',
-    blurb: 'Build the datapath one instruction class at a time: fetch, R-format, load/store, branch — then combine with MUXes.',
+    blurb: "We build a working processor piece by piece — first fetching instructions, then doing math, then reading/writing memory, then making decisions (branches).",
     topics: [
       {
         id: 'm4-fetch', title: 'Datapath and instruction fetch', slides: '12–13',
@@ -237,7 +237,7 @@ export const MODULES: Module[] = [
   },
   {
     id: 'm5', n: 5, title: 'Control Signals & ALU Control', slides: '21–31',
-    blurb: 'How the opcode becomes signals that steer every MUX and enable, including the two-level ALU control.',
+    blurb: "The on/off signals that tell each part what to do for each kind of instruction, and how the processor picks which math operation to run.",
     topics: [
       {
         id: 'm5-aluctrl', title: 'ALU control', slides: '22–24',
@@ -282,7 +282,7 @@ export const MODULES: Module[] = [
   },
   {
     id: 'm6', n: 6, title: 'Performance & the Multicycle Datapath', slides: '32–36',
-    blurb: 'Why a single long clock is wasteful, and how a multicycle design reuses hardware across shorter steps.',
+    blurb: "Why the simple processor is slow (every instruction waits as long as the slowest one) and one way to fix it: split the work into shorter steps.",
     topics: [
       {
         id: 'm6-single', title: 'Single-cycle performance issues', slides: '32–33',
@@ -314,7 +314,7 @@ export const MODULES: Module[] = [
   },
   {
     id: 'm7', n: 7, title: 'Introduction to Pipelining', slides: '37–42',
-    blurb: 'Overlap the stages of consecutive instructions — the laundry analogy, five RISC-V stages and speedup math.',
+    blurb: "The big speed-up idea: treat the processor like an assembly line so several instructions are being worked on at the same time.",
     topics: [
       {
         id: 'm7-laundry', title: 'Pipelining analogy: laundry', slides: '37',
@@ -372,7 +372,7 @@ export const MODULES: Module[] = [
   },
   {
     id: 'm8', n: 8, title: 'Structural & Data Hazards', slides: '43–48',
-    blurb: 'When the next instruction can’t start: resource conflicts, data dependencies, forwarding, load-use stalls and code scheduling.',
+    blurb: "What goes wrong on the assembly line when two instructions want the same part, or one needs a result that isn’t ready yet — and how to fix it.",
     topics: [
       {
         id: 'm8-hazards', title: 'Hazards and structural hazards', slides: '43–44',
@@ -430,7 +430,7 @@ export const MODULES: Module[] = [
   },
   {
     id: 'm9', n: 9, title: 'Control Hazards & Branch Prediction', slides: '49–53',
-    blurb: 'The pipeline must fetch before it knows the branch outcome: stall, resolve early, or predict.',
+    blurb: "What to do when the processor doesn’t yet know which instruction comes next (after an “if”): wait, or make a smart guess.",
     topics: [
       {
         id: 'm9-control', title: 'Control hazards and stall on branch', slides: '49–50',
@@ -475,7 +475,7 @@ export const MODULES: Module[] = [
   },
   {
     id: 'm10', n: 10, title: 'The Complete Pipelined Datapath', slides: '54–61',
-    blurb: 'Pipeline registers, what they carry, cycle-by-cycle diagrams, and the “wrong register number” bug.',
+    blurb: "The finished assembly-line processor: the storage boxes between stations, what they hold, and a classic bug they prevent.",
     topics: [
       {
         id: 'm10-regs', title: 'Pipeline registers', slides: '54–55',

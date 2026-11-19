@@ -20,7 +20,7 @@ export function Segmented<T extends string>({ value, options, onChange, label }:
     <div role="radiogroup" aria-label={label} className="inline-flex rounded-lg border border-line bg-raised p-0.5 flex-wrap">
       {options.map((o) => (
         <button key={o.value} role="radio" aria-checked={value === o.value} onClick={() => onChange(o.value)}
-          className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${value === o.value ? 'bg-surface shadow-sm text-ink' : 'text-muted hover:text-ink'}`}>
+          className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${value === o.value ? 'bg-surface shadow-sm text-ink' : 'text-muted hover:text-ink'}`}>
           {o.label}
         </button>
       ))}
@@ -114,12 +114,13 @@ export function Kbd({ children }: { children: ReactNode }) {
   return <kbd className="font-mono text-[10px] border border-line rounded px-1 bg-raised">{children}</kbd>;
 }
 
-export function Stat({ label, value, tone }: { label: string; value: ReactNode; tone?: 'ok' | 'warn' | 'bad' | 'accent' }) {
+export function Stat({ label, value, tone, hint }: { label: string; value: ReactNode; tone?: 'ok' | 'warn' | 'bad' | 'accent'; hint?: string }) {
   const t = tone ? { ok: 'text-ok', warn: 'text-warn', bad: 'text-bad', accent: 'text-accent' }[tone] : '';
   return (
-    <div className="rounded-lg bg-raised px-3 py-2">
+    <div className="rounded-lg bg-raised px-3 py-2" title={hint}>
       <div className="text-[11px] uppercase tracking-wide text-muted">{label}</div>
       <div className={`font-mono font-semibold text-lg ${t}`}>{value}</div>
+      {hint && <div className="text-[10px] text-muted leading-tight">{hint}</div>}
     </div>
   );
 }

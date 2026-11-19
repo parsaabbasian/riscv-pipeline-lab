@@ -32,9 +32,9 @@ const WIRES: W[] = [
   { id: 'add4_mux', pts: [[200, 92], [860, 92], [860, 75], [880, 75]], stage: 1, label: [230, 86] },
   { id: 'mux_pc', pts: [[902, 92], [965, 92], [965, 18], [22, 18], [22, 285], [40, 285]], stage: 1, label: [500, 13] },
   { id: 'inst', pts: [[220, 285], [252, 285]], stage: 2 },
-  { id: 'rs1', pts: [[252, 238], [330, 238]], stage: 2, label: [262, 232] },
-  { id: 'rs2', pts: [[252, 266], [330, 266]], stage: 2, label: [262, 260] },
-  { id: 'rd', pts: [[252, 296], [330, 296]], stage: 2, label: [262, 290] },
+  { id: 'rs1', pts: [[252, 238], [330, 238]], stage: 2, label: [266, 232] },
+  { id: 'rs2', pts: [[252, 266], [330, 266]], stage: 2, label: [266, 260] },
+  { id: 'rd', pts: [[252, 296], [330, 296]], stage: 2, label: [266, 291] },
   { id: 'rd1', pts: [[460, 250], [560, 250]], stage: 3, label: [470, 244] },
   { id: 'rd2_mux', pts: [[460, 318], [492, 318], [510, 318]], stage: 3, label: [466, 312] },
   { id: 'wb', pts: [[882, 312], [945, 312], [945, 530], [300, 530], [300, 326], [330, 326]], stage: 3, label: [600, 524] },
@@ -146,6 +146,7 @@ export default function Datapath({ op = null, trace = null, maxStage = 7, select
   const vals = trace ? wireValues(trace) : {};
   const vis = (s: number) => s <= maxStage;
   return (
+    <div className="space-y-2">
     <ZoomPan width={990} height={550}>
       <defs>
         <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="rgb(var(--muted))" /></marker>
@@ -203,7 +204,7 @@ export default function Datapath({ op = null, trace = null, maxStage = 7, select
           <text x={334} y={242}>Read reg 1</text><text x={334} y={270}>Read reg 2</text><text x={334} y={300}>Write reg</text><text x={334} y={330}>Write data</text>
           <text x={402} y={254}>Read data 1</text><text x={402} y={322}>Read data 2</text>
           {vis(5) && <><text x={704} y={294}>Address</text><text x={704} y={349}>Write data</text><text x={768} y={304}>Read data</text></>}
-          <text x={226} y={279}>[31:0]</text>
+          <text x={222} y={274}>[31:0]</text>
           {vis(3) && <text x={600} y={246}>Zero</text>}
           {vis(4) && <><text x={515} y={313}>0</text><text x={515} y={350}>1</text></>}
           {vis(5) && <><text x={864} y={300}>0</text><text x={864} y={332}>1</text></>}
@@ -217,5 +218,13 @@ export default function Datapath({ op = null, trace = null, maxStage = 7, select
         </g>
       ))}
     </ZoomPan>
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted" aria-label="Diagram legend">
+        <span className="flex items-center gap-1.5"><span className="w-6 h-[3px] rounded bg-accent" />wire used by this instruction</span>
+        <span className="flex items-center gap-1.5"><span className="w-6 h-px bg-muted opacity-60" />wire not used</span>
+        <span className="flex items-center gap-1.5"><span className="w-6 border-t-2 border-dashed border-teal" />control signal</span>
+        <span className="flex items-center gap-1.5"><span className="font-mono text-ink">x5 · 12</span>value on that wire right now</span>
+        {onSelect && <span>Tip: click any box to learn what it does.</span>}
+      </div>
+    </div>
   );
 }

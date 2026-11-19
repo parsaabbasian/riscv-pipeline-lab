@@ -96,8 +96,8 @@ export function TimingChart({ chart, upTo, total }: { chart: ReturnType<typeof t
       </table>
       <div className="flex flex-wrap gap-3 mt-2 text-[11px] text-muted">
         {STAGES.map((s) => <span key={s} className="flex items-center gap-1"><span className={`w-3 h-3 rounded ${STAGE_COLOR[s]}`} />{s}</span>)}
-        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-warn/25 border border-warn border-dashed" />stalled (repeats stage)</span>
-        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-bad/20" />flushed</span>
+        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-warn/25 border border-warn border-dashed" />waiting (stall)</span>
+        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-bad/20" />thrown away (flushed)</span>
       </div>
     </div>
   );
@@ -181,6 +181,7 @@ export default function PipelineRunner({ program, regs = '', mem = '', opts: o0,
   const [memS, setMem] = useState(mem);
   const [opts, setOpts] = useState<PipeOptions>({ ...DEFAULT_OPTS, forwarding: o0?.forwarding ?? (persist ? fwPref : true), ...o0 });
   const { run, chart, error } = usePipeRun(src, regsS, memS, opts);
+  const beginner = useApp((s) => s.mode) === 'beginner';
   const deps = useMemo(() => (run ? dependencies(run) : []), [run]);
   const len = run?.states.length ?? 1;
   const p = usePlayer(len);
@@ -216,14 +217,16 @@ export default function PipelineRunner({ program, regs = '', mem = '', opts: o0,
             <>
               <PlayerControls p={p} len={len} />
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                <Stat label="Cycle" value={`${st.cycle}/${run.cycles}`} tone="accent" />
-                <Stat label="PC" value={st.pc} />
-                <Stat label="Completed" value={st.committed} tone="ok" />
-                <Stat label="Stalls" value={st.stalls} tone={st.stalls ? 'warn' : undefined} />
-                <Stat label="Flushes" value={st.flushes} tone={st.flushes ? 'bad' : undefined} />
-                <Stat label="CPI" value={st.committed ? (st.cycle / st.committed).toFixed(2) : '—'} />
+                <Stat label="Cycle" value={`${st.cycle}/${run.cycles}`} tone="accent" hint={beginner ? 'clock ticks so far' : undefined} />
+                <Stat label="PC" value={st.pc} hint={beginner ? 'address fetched next' : undefined} />
+                <Stat label="Completed" value={st.committed} tone="ok" hint={beginner ? 'instructions finished' : undefined} />
+                <Stat label="Stalls" value={st.stalls} tone={st.stalls ? 'warn' : undefined} hint={beginner ? 'cycles spent waiting' : undefined} />
+                <Stat label="Flushes" value={st.flushes} tone={st.flushes ? 'bad' : undefined} hint={beginner ? 'wrong guesses thrown away' : undefined} />
+                <Stat label="CPI" value={st.committed ? (st.cycle / st.committed).toFixed(2) : '—'} hint={beginner ? 'cycles per finished instr.' : undefined} />
               </div>
-              {st.cycle > 0 ? <StageStrip st={st} /> : <div className="text-sm text-muted">Cycle 0 — the pipeline is empty. Press Next or Play.</div>}
+              {st.cycle > 0 ? <StageStrip st={st} /> : <div className="text-sm text-muted">Cycle 0 — the pipeline is empty. Press <b>Next</b> to advance one clock tick, or <b>Play</b> to run.</div>}
+              {st.cycle > 0 && <Narration st={st} />}
+              {beginner && <HowToRead />}
               <div className="flex gap-2">
                 <Segmented label="View" value={tab} onChange={setTab} options={[{ value: 'chart', label: 'Timing diagram' }, { value: 'datapath', label: 'Pipeline registers' }]} />
               </div>
@@ -267,6 +270,54 @@ export default function PipelineRunner({ program, regs = '', mem = '', opts: o0,
         </div>
       </div>
     </div>
+  );
+}
+
+const DOING: Record<string, (t: string, ins: Instr) => string> = {
+  IF: (t) => `${t} is being fetched from instruction memory`,
+  ID: (t, i) => `${t} is being decoded and its registers are read${i.op === 'beq' ? ' (the branch decision is made here)' : ''}`,
+  EX: (t, i) => i.op === 'ld' || i.op === 'sd' ? `${t} is computing its memory address in the ALU` : i.op === 'beq' ? `${t} passes through EX (nothing left to do)` : `${t} is calculating its result in the ALU`,
+  MEM: (t, i) => i.op === 'ld' ? `${t} is reading data memory` : i.op === 'sd' ? `${t} is writing data memory` : `${t} passes through MEM (no memory needed)`,
+  WB: (t, i) => i.op === 'sd' || i.op === 'beq' ? `${t} finishes (nothing to write back)` : `${t} writes its result into x${i.rd}`,
+};
+
+/** Plain-English description of what every stage is doing this cycle. */
+function Narration({ st }: { st: PipeState }) {
+  return (
+    <div className="rounded-lg border border-line p-3 text-sm space-y-1">
+      <div className="text-xs font-semibold text-muted mb-1">In plain English — cycle {st.cycle}</div>
+      {STAGES.map((s) => {
+        const d = st.occupancy[s], m = st.marks[s];
+        let text: string;
+        if (m === 'bubble') text = 'empty slot (a “bubble”) — nothing useful happens here this cycle';
+        else if (!d) text = m === 'flush' ? 'empty — a wrongly fetched instruction was thrown away' : 'empty';
+        else if (m === 'stall') text = `${d.instr.text} is waiting (stalled) for a value it needs`;
+        else if (m === 'flush') text = `${d.instr.text} was fetched by mistake and is being thrown away`;
+        else text = DOING[s](d.instr.text, d.instr);
+        return (
+          <div key={s} className="flex gap-2 items-baseline">
+            <span className={`${STAGE_COLOR[s]} text-white text-[10px] font-bold rounded px-1.5 w-10 text-center shrink-0`}>{s}</span>
+            <span className={m === 'stall' || m === 'bubble' ? 'text-warn' : m === 'flush' ? 'text-bad' : !d ? 'text-muted' : ''}>{text}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function HowToRead() {
+  return (
+    <details className="rounded-lg border border-line p-3 text-sm">
+      <summary className="cursor-pointer font-medium">How do I read this simulator?</summary>
+      <ul className="list-disc pl-5 mt-2 space-y-1 text-muted">
+        <li>A program runs like an <b className="text-ink">assembly line</b> with 5 stations: IF (fetch), ID (decode), EX (calculate), MEM (memory), WB (write result).</li>
+        <li>Every press of <b className="text-ink">Next</b> is one clock tick: every instruction moves one station to the right.</li>
+        <li>In the <b className="text-ink">timing diagram</b>, each row is one instruction and each column is one clock tick. A diagonal staircase means everything is flowing.</li>
+        <li><span className="text-warn">Amber dashed</span> cells mean an instruction had to <b className="text-ink">wait</b>, because it needs a result that isn’t ready yet.</li>
+        <li><span className="text-bad">Red</span> cells mean an instruction was fetched by mistake (after a branch) and thrown away.</li>
+        <li>Change the program on the left, or flip <b className="text-ink">Forwarding</b>, and see how the number of cycles changes.</li>
+      </ul>
+    </details>
   );
 }
 

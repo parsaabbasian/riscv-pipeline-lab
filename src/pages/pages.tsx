@@ -52,7 +52,7 @@ export function HomePage() {
       <div className="card p-6 sm:p-8 relative overflow-hidden">
         <div className="text-xs font-semibold uppercase tracking-wider text-accent mb-2">Lecture 8 · Computer Organization and Design RISC-V</div>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight max-w-2xl">From one instruction to a five-stage pipeline.</h1>
-        <p className="text-muted mt-3 max-w-2xl leading-relaxed">Ten modules covering slides 1–61: logic and clocking, the single-cycle datapath and its control, multicycle design, pipelining, hazards, branch prediction and the pipelined datapath. Every simulator computes real state — nothing is pre-recorded.</p>
+        <p className="text-muted mt-3 max-w-2xl leading-relaxed">Ten modules covering slides 1–61: logic and clocking, the single-cycle datapath and its control, multicycle design, pipelining, hazards, branch prediction and the pipelined datapath. The simulators calculate their results from the program you give them.</p>
         <div className="flex flex-wrap gap-2 mt-5">
           <Link to={`/lesson/${resume.module.id}#${resume.id}`} className="btn btn-primary">{done ? 'Continue' : 'Start'}: {resume.title}<ArrowRight className="w-4 h-4" /></Link>
           <Link to="/pipeline" className="btn">Open the pipeline simulator</Link>
@@ -111,7 +111,7 @@ function StartHere() {
     <Card title="New here? Start with this">
       <div className="grid lg:grid-cols-2 gap-6">
         <div>
-          <div className="text-sm font-semibold mb-2">The whole lecture in five sentences</div>
+          <div className="text-sm font-semibold mb-2">The lecture in five steps</div>
           <ol className="space-y-2">
             {STORY.map((s, i) => (
               <li key={i} className="flex gap-3">
@@ -124,10 +124,10 @@ function StartHere() {
         <div>
           <div className="text-sm font-semibold mb-2">How to use this app</div>
           <ul className="space-y-2 text-sm text-muted list-disc pl-5">
-            <li>Go through the modules <b className="text-ink">in order</b> — each one only uses words explained before.</li>
+            <li>Go through the modules <b className="text-ink">in order</b>. Each one only uses words explained before it.</li>
             <li>Every topic is a short list of steps. Read the plain-English part first; the technical part is optional at first.</li>
-            <li>Diagrams are <b className="text-ink">interactive</b>: change the numbers and watch what happens. You can’t break anything.</li>
-            <li>Answer the question at the end of each topic — a correct answer marks it complete.</li>
+            <li>Diagrams are <b className="text-ink">interactive</b>: change the numbers and watch what happens.</li>
+            <li>Answer the question at the end of each topic. A correct answer marks it complete.</li>
             <li>Unknown word? Check the <Link to="/glossary" className="text-accent">Glossary</Link>.</li>
           </ul>
           {mode !== 'beginner' && <button className="btn mt-3" onClick={() => setMode('beginner')}>Switch to Beginner mode (explains everything)</button>}
@@ -217,7 +217,7 @@ function TopicView({ t }: { t: Topic }) {
           )}
         </Step>
         {W && (
-          <Step n={++k} title={`Visualise, animate & manipulate — ${W.title}`}>
+          <Step n={++k} title={`Try it: ${W.title}`}>
             {showViz ? <div className="not-prose">{W.render()}</div> : <button className="btn" onClick={() => setShowViz(true)}><Eye className="w-4 h-4" />Show interactive diagram</button>}
           </Step>
         )}
@@ -247,7 +247,7 @@ export function LessonPage() {
       <div className="space-y-5 min-w-0">
         <PageHead kicker={`Module ${m.n} · Slides ${m.slides}`} title={m.title}>{m.blurb}</PageHead>
         {mode === 'beginner' && <Callout kind="tip" title="Beginner mode">Every term is introduced before use, analogies are shown, and interactive diagrams are open. Switch to Exam mode in the top bar for a condensed review.</Callout>}
-        {mode === 'exam' && <Callout kind="info" title="Exam mode">Only technical summaries, formulas, RISC-V examples, checks and exam points are shown. Diagrams are collapsed — expand them when needed.</Callout>}
+        {mode === 'exam' && <Callout kind="info" title="Exam mode">Only technical summaries, formulas, RISC-V examples, checks and exam points are shown. Diagrams are collapsed; open them when you need them.</Callout>}
         {m.topics.map((t) => <TopicView key={t.id} t={t} />)}
         <div className="flex justify-between gap-2">
           {prev ? <Link className="btn" to={`/lesson/${prev.id}`}><ChevronLeft className="w-4 h-4" />M{prev.n} {prev.title}</Link> : <span />}
@@ -299,7 +299,7 @@ export function PipelinePage() {
   return (
     <div className="space-y-4">
       {beginner && <div className="mb-4"><Callout kind="tip" title="Tip">New to pipelines? Read Module 7 first. Then press <b>Next</b> here a few times and follow the plain-English panel. Advanced switches appear in Standard mode.</Callout></div>}
-      <PageHead kicker="Flagship" title="Pipeline Simulator">A cycle-accurate model of the five-stage RISC-V pipeline: pipeline registers, hazard detection, forwarding unit, load-use stalls, branch resolution in ID with stall or predict-not-taken. Every value shown is computed from the program and initial state; Prev/Next replays deterministic snapshots.</PageHead>
+      <PageHead kicker="Simulator" title="Pipeline Simulator">A model of the five-stage RISC-V pipeline: pipeline registers, hazard detection, forwarding unit, load-use stalls, branch resolution in ID with stall or predict-not-taken. Prev and Next step backward and forward one clock cycle.</PageHead>
       <div className="flex flex-wrap gap-1">{Object.entries(PRESETS).map(([k, v]) => <button key={k} className={`btn !text-xs ${preset === k ? 'btn-primary' : ''}`} onClick={() => setPreset(k)}>{v.label}</button>)}</div>
       <div className="card p-4"><PipelineRunner key={preset} persist {...PRESETS[preset].p} show={{ options: beginner ? ['forwarding', 'branchPolicy'] : ['forwarding', 'branchPolicy', 'unifiedMemory', 'buggyWriteRegister'] }} /></div>
     </div>
@@ -328,7 +328,7 @@ export function HazardPage() {
 export function PerfPage() {
   return (
     <div className="space-y-4">
-      <PageHead kicker="Lab" title="Performance Calculator">Critical path, single-cycle vs multicycle, the laundry analogy and pipelined speedup — with the lecture’s numbers (100 ps register read/write, 200 ps for other stages) as defaults.</PageHead>
+      <PageHead kicker="Lab" title="Performance Calculator">Critical path, single-cycle vs multicycle, the laundry analogy and pipelined speedup, using the lecture’s numbers (100 ps register read/write, 200 ps for other stages) as defaults.</PageHead>
       <Card title="Pipeline speedup (slides 39–41)"><PerfCalc /></Card>
       <Card title="Single-cycle critical path (slide 32)"><CriticalPath /></Card>
       <Card title="Single-cycle vs multicycle (slides 33–36)"><SingleVsMulti /></Card>
@@ -378,7 +378,7 @@ export function CoveragePage() {
                 <td className="px-3 py-2 font-mono">{r.slide}</td>
                 <td className="px-3 py-2 text-xs whitespace-nowrap">{r.moduleTitle}</td>
                 <td className="px-3 py-2">{r.topics.map((t) => <Link key={t.id} to={`/lesson/${r.module}#${t.id}`} className="block text-accent hover:underline">{t.title}</Link>)}</td>
-                <td className="px-3 py-2 text-xs">{r.widgets.join(', ') || '—'}</td>
+                <td className="px-3 py-2 text-xs">{r.widgets.join(', ') || '-'}</td>
                 <td className="px-3 py-2 text-xs">{r.questions} question{r.questions === 1 ? '' : 's'}</td>
                 <td className="px-3 py-2 text-xs">{r.status === 'covered' ? <span className="text-ok">✓ covered{r.topics.every((t) => completed[t.id]) ? ' · studied' : ''}</span> : <span className="text-bad">missing</span>}</td>
               </tr>

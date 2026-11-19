@@ -21,6 +21,6 @@ export function coverage(): CoverageRow[] {
     const topics = ALL_TOPICS.filter((t) => expandSlides(t.slides).includes(slide));
     const widgets = [...new Set(topics.map((t) => t.widget).filter(Boolean).map((w) => WIDGETS[w!].title))];
     const questions = QUESTIONS.filter((q) => expandSlides(q.slides).includes(slide)).length;
-    return { slide, module: mod?.id ?? '', moduleTitle: mod ? `M${mod.n} ${mod.title}` : '—', topics: topics.map((t) => ({ id: t.id, title: t.title })), widgets, questions, status: topics.length ? 'covered' : 'missing' };
+    return { slide, module: mod?.id ?? '', moduleTitle: mod ? `M${mod.n} ${mod.title}` : '-', topics: topics.map((t) => ({ id: t.id, title: t.title })), widgets, questions, status: topics.length ? 'covered' : 'missing' };
   });
 }

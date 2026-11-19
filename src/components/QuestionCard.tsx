@@ -54,7 +54,7 @@ export default function QuestionCard({ q, index, onAnswered, record = true }: { 
       {hint && !submitted && <div className="text-sm text-teal">Hint: {q.hint}</div>}
       {submitted && (
         <div className={`rounded-lg border p-3 text-sm ${ok ? 'border-ok/40 bg-ok/5' : 'border-bad/40 bg-bad/5'}`}>
-          <div className="flex items-center gap-1.5 font-semibold mb-1">{ok ? <CheckCircle2 className="w-4 h-4 text-ok" /> : <XCircle className="w-4 h-4 text-bad" />}{ok ? 'Correct' : `Not quite — correct answer: ${q.type === 'num' ? q.answer : String.fromCharCode(65 + q.answer) + '. ' + q.options![q.answer]}`}</div>
+          <div className="flex items-center gap-1.5 font-semibold mb-1">{ok ? <CheckCircle2 className="w-4 h-4 text-ok" /> : <XCircle className="w-4 h-4 text-bad" />}{ok ? 'Correct' : `Not quite. Correct answer: ${q.type === 'num' ? q.answer : String.fromCharCode(65 + q.answer) + '. ' + q.options![q.answer]}`}</div>
           <div className="leading-relaxed">{q.solution}</div>
         </div>
       )}

@@ -113,7 +113,7 @@ export function StageStrip({ st }: { st: PipeState }) {
           <div key={s} className="rounded-lg border border-line overflow-hidden">
             <div className={`${STAGE_COLOR[s]} text-white text-[11px] font-bold px-2 py-0.5`}>{s}</div>
             <div className="px-2 py-1.5 text-[11px] font-mono min-h-[38px] leading-tight">
-              {m === 'bubble' ? <span className="text-warn">bubble (nop)</span> : m === 'flush' && !d ? <span className="text-bad">flushed slot</span> : d ? <>{d.instr.text}{m === 'stall' && <div className="text-warn">stalled</div>}{m === 'flush' && <div className="text-bad">flushed</div>}</> : <span className="text-muted">—</span>}
+              {m === 'bubble' ? <span className="text-warn">bubble (nop)</span> : m === 'flush' && !d ? <span className="text-bad">flushed slot</span> : d ? <>{d.instr.text}{m === 'stall' && <div className="text-warn">stalled</div>}{m === 'flush' && <div className="text-bad">flushed</div>}</> : <span className="text-muted">-</span>}
             </div>
           </div>
         );
@@ -129,7 +129,7 @@ export function PipeDatapathView({ st, buggy }: { st: PipeState; buggy?: boolean
     { name: 'IF/ID', x: 178, rows: st.ifid ? [`inst: ${st.ifid.d.instr.text}`, `PC: ${st.ifid.d.pc}`] : [st.bub.ID ? 'bubble' : 'empty'] },
     { name: 'ID/EX', x: 363, rows: st.idex ? [`${st.idex.d.instr.text}`, `RD1: ${st.idex.rd1}`, `RD2: ${st.idex.rd2}`, `imm: ${st.idex.imm}`, `rd: x${st.idex.rd}`, `ALUSrc=${st.idex.ctrl.ALUSrc} RW=${st.idex.ctrl.RegWrite}`] : [st.bub.EX ? 'bubble (ctrl = 0)' : 'empty'] },
     { name: 'EX/MEM', x: 548, rows: st.exmem ? [`${st.exmem.d.instr.text}`, `ALU: ${st.exmem.aluResult}`, `Zero: ${st.exmem.zero ? 1 : 0}`, `store: ${st.exmem.storeData}`, `rd: x${st.exmem.rd}`, `MR=${st.exmem.ctrl.MemRead} MW=${st.exmem.ctrl.MemWrite}`] : [st.bub.MEM ? 'bubble' : 'empty'] },
-    { name: 'MEM/WB', x: 733, rows: st.memwb ? [`${st.memwb.d.instr.text}`, `mem: ${st.memwb.memData ?? '—'}`, `ALU: ${st.memwb.aluResult}`, `rd: x${st.memwb.rd}`, `RW=${st.memwb.ctrl.RegWrite} M2R=${st.memwb.ctrl.MemtoReg}`] : [st.bub.WB ? 'bubble' : 'empty'] },
+    { name: 'MEM/WB', x: 733, rows: st.memwb ? [`${st.memwb.d.instr.text}`, `mem: ${st.memwb.memData ?? '-'}`, `ALU: ${st.memwb.aluResult}`, `rd: x${st.memwb.rd}`, `RW=${st.memwb.ctrl.RegWrite} M2R=${st.memwb.ctrl.MemtoReg}`] : [st.bub.WB ? 'bubble' : 'empty'] },
   ];
   const names = ['Instruction fetch', 'Decode / reg read', 'Execute / address', 'Memory access', 'Write back'];
   const nextWb = st.memwb && st.memwb.ctrl.RegWrite === 1;
@@ -141,7 +141,7 @@ export function PipeDatapathView({ st, buggy }: { st: PipeState; buggy?: boolean
           <rect x={X[k]} y={20} width={150} height={270} rx={10} fill={STAGE_STROKE[s].replace('))', ') / 0.08)')} stroke={STAGE_STROKE[s]} strokeWidth={1.2} />
           <text x={X[k] + 10} y={40} fontWeight={700} fontSize={14} fill={STAGE_STROKE[s]}>{s}</text>
           <text x={X[k] + 10} y={56} fontSize={10} fill="rgb(var(--muted))">{names[k]}</text>
-          <text x={X[k] + 10} y={84} fontSize={11} fontFamily="JetBrains Mono" fill="rgb(var(--ink))">{st.occupancy[s]?.instr.text ?? (st.marks[s] === 'bubble' ? 'bubble' : '—')}</text>
+          <text x={X[k] + 10} y={84} fontSize={11} fontFamily="JetBrains Mono" fill="rgb(var(--ink))">{st.occupancy[s]?.instr.text ?? (st.marks[s] === 'bubble' ? 'bubble' : '-')}</text>
         </g>
       ))}
       {latch.map((l) => (
@@ -222,9 +222,9 @@ export default function PipelineRunner({ program, regs = '', mem = '', opts: o0,
                 <Stat label="Completed" value={st.committed} tone="ok" hint={beginner ? 'instructions finished' : undefined} />
                 <Stat label="Stalls" value={st.stalls} tone={st.stalls ? 'warn' : undefined} hint={beginner ? 'cycles spent waiting' : undefined} />
                 <Stat label="Flushes" value={st.flushes} tone={st.flushes ? 'bad' : undefined} hint={beginner ? 'wrong guesses thrown away' : undefined} />
-                <Stat label="CPI" value={st.committed ? (st.cycle / st.committed).toFixed(2) : '—'} hint={beginner ? 'cycles per finished instr.' : undefined} />
+                <Stat label="CPI" value={st.committed ? (st.cycle / st.committed).toFixed(2) : '-'} hint={beginner ? 'cycles per finished instr.' : undefined} />
               </div>
-              {st.cycle > 0 ? <StageStrip st={st} /> : <div className="text-sm text-muted">Cycle 0 — the pipeline is empty. Press <b>Next</b> to advance one clock tick, or <b>Play</b> to run.</div>}
+              {st.cycle > 0 ? <StageStrip st={st} /> : <div className="text-sm text-muted">Cycle 0: the pipeline is empty. Press <b>Next</b> to advance one clock tick, or <b>Play</b> to run.</div>}
               {st.cycle > 0 && <Narration st={st} />}
               {beginner && <HowToRead />}
               <div className="flex gap-2">
@@ -285,12 +285,12 @@ const DOING: Record<string, (t: string, ins: Instr) => string> = {
 function Narration({ st }: { st: PipeState }) {
   return (
     <div className="rounded-lg border border-line p-3 text-sm space-y-1">
-      <div className="text-xs font-semibold text-muted mb-1">In plain English — cycle {st.cycle}</div>
+      <div className="text-xs font-semibold text-muted mb-1">In plain English, cycle {st.cycle}</div>
       {STAGES.map((s) => {
         const d = st.occupancy[s], m = st.marks[s];
         let text: string;
-        if (m === 'bubble') text = 'empty slot (a “bubble”) — nothing useful happens here this cycle';
-        else if (!d) text = m === 'flush' ? 'empty — a wrongly fetched instruction was thrown away' : 'empty';
+        if (m === 'bubble') text = 'empty slot (a “bubble”), nothing useful happens here this cycle';
+        else if (!d) text = m === 'flush' ? 'empty, a wrongly fetched instruction was thrown away' : 'empty';
         else if (m === 'stall') text = `${d.instr.text} is waiting (stalled) for a value it needs`;
         else if (m === 'flush') text = `${d.instr.text} was fetched by mistake and is being thrown away`;
         else text = DOING[s](d.instr.text, d.instr);

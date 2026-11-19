@@ -90,7 +90,7 @@ export function MuxSim() {
         <path d="M 290 110 L 470 110" stroke="rgb(var(--ok))" strokeWidth={3} />
         <text x={330} y={100} fontFamily="JetBrains Mono" fontSize={15} fontWeight={700} fill="rgb(var(--ok))">Y = {y}</text>
       </ZoomPan>
-      <p className="text-sm">Y = S ? I1 : I0 = <code className="k">{s} ? {i1} : {i0}</code> = <b>{y}</b>. If you simply joined the two wires, both sources would drive the same wire with different values — an electrical conflict. The MUX makes the choice explicit.</p>
+      <p className="text-sm">Y = S ? I1 : I0 = <code className="k">{s} ? {i1} : {i0}</code> = <b>{y}</b>. If you simply joined the two wires, both sources would drive the same wire with different values, which is an electrical conflict. The MUX makes the choice explicit.</p>
     </div>
   );
 }
@@ -115,7 +115,7 @@ export function GatesSim() {
         <div className="font-mono text-xs text-muted">Truth table: 00→0 · 01→0 · 10→0 · 11→1</div>
       </div>
       <div className="card p-3 space-y-2">
-        <div className="font-semibold">ALU — Y = F(A, B)</div>
+        <div className="font-semibold">ALU: Y = F(A, B)</div>
         <div className="flex flex-wrap gap-2">{numIn(A, setAA, 'A')}{numIn(B, setBB, 'B')}</div>
         <Segmented label="ALU function" value={f} onChange={setF} options={['0000', '0001', '0010', '0110'].map((v) => ({ value: v, label: `${v} ${ALU_NAME[v]}` }))} />
         <div className="font-mono">Y = {res} &nbsp; Zero = {res === 0 ? 1 : 0}</div>
@@ -132,7 +132,7 @@ export function RegisterSim({ withClockOnly = false }: { withClockOnly?: boolean
   const [we, setWe] = useState(true);
   const [clk, setClk] = useState(0);
   const [hist, setHist] = useState<{ clk: number; d: number; q: number; we: boolean; edge?: boolean }[]>([{ clk: 0, d: 8, q: 3, we: true }]);
-  const [msg, setMsg] = useState('Clock is LOW. Change D — Q does not follow.');
+  const [msg, setMsg] = useState('Clock is LOW. Change D and notice that Q does not follow.');
   const push = (c: number, nd: number, nq: number, nwe: boolean, edge = false) => setHist((h) => {
     const last = h[h.length - 1];
     // typing in D (no clock activity) updates the current time step instead of adding new ones
@@ -206,7 +206,7 @@ export function RegisterSim({ withClockOnly = false }: { withClockOnly?: boolean
             {bus(view.map((h) => h.q), yOf('Q'), 'rgb(var(--ok))')}
             {view.length < N && <text x={X0 + view.length * SW + 8} y={H / 2} fontSize={11} fill="rgb(var(--muted))">← new events appear here</text>}
           </svg>
-          <p className="text-xs text-muted">Amber dashed lines mark rising edges — the only moments Q may change.</p>
+          <p className="text-xs text-muted">Amber dashed lines mark rising edges, the only moments Q may change.</p>
         </div>
       </div>
     </div>
@@ -233,7 +233,7 @@ export function ClockSim() {
         }, { x: 0, els: [] }).els}
         <div className="absolute top-9 h-5 border-r-2 border-dashed border-warn text-[10px] text-warn pr-1 text-right" style={{ left: 0, width: `${(period / Math.max(total, period)) * 100}%` }}>next rising edge at {period} ps</div>
       </div>
-      <div className={ok ? 'text-ok' : 'text-bad'}>{ok ? `OK: the critical path (${total} ps) finishes before the next edge.` : `Timing violation: the critical path needs ${total} ps but the clock edge arrives at ${period} ps — the register would capture a wrong (unfinished) value.`}</div>
+      <div className={ok ? 'text-ok' : 'text-bad'}>{ok ? `OK: the critical path (${total} ps) finishes before the next edge.` : `Timing violation: the critical path needs ${total} ps but the clock edge arrives at ${period} ps, so the register would capture a wrong (unfinished) value.`}</div>
     </div>
   );
 }
@@ -251,7 +251,7 @@ export function ImmGenSim() {
       <div className="font-mono text-xs break-all">
         <div>12-bit field: <span className="text-accent">{bits12}</span></div>
         <div className="mt-1">sign-extended: <span className="text-warn">{ext.slice(0, 52)}</span><span className="text-accent">{ext.slice(52)}</span></div>
-        <div className="text-muted mt-1">The sign bit ({bits12[0]}) is copied into the 52 upper bits — slide 17: “sign-bit wire replicated”.</div>
+        <div className="text-muted mt-1">The sign bit ({bits12[0]}) is copied into the 52 upper bits (slide 17: “sign-bit wire replicated”).</div>
       </div>
       <div className="rounded-lg bg-raised p-3 font-mono">ld x4, {v}(x1) → address = {base} + ({v}) = <b className="text-ok">{base + v}</b></div>
       {imm !== v && <div className="text-warn text-xs">Value clamped: a 12-bit signed field can only hold −2048…2047.</div>}
@@ -307,7 +307,7 @@ export function Formats() {
           <div className="font-mono text-xs mt-2 text-muted">hex: 0x{parseInt(fields.map((f) => f.bits).join(''), 2).toString(16).padStart(8, '0')} · bits 31 → 0</div>
         </div>
       )}
-      <p className="text-xs text-muted">Notice rs1 and rs2 always occupy the same bit positions — that is what lets the register file be read during decode (slide 42).</p>
+      <p className="text-xs text-muted">Notice rs1 and rs2 always occupy the same bit positions. That is what lets the register file be read during decode (slide 42).</p>
     </div>
   );
 }
@@ -330,7 +330,7 @@ export function AluCtrlSim() {
         <Segmented label="funct7" value={f7} onChange={setF7} options={[{ value: '0000000', label: 'f7 0000000' }, { value: '0100000', label: '0100000' }]} />
         <Segmented label="funct3" value={f3} onChange={setF3} options={[{ value: '000', label: 'f3 000' }, { value: '111', label: '111' }, { value: '110', label: '110' }]} />
       </div>
-      <div className="font-mono">ALU control = <b className="text-teal">{out}</b> ({ALU_NAME[out] ?? 'undefined combination'}) {aluop !== '10' && <span className="text-muted text-xs">— funct fields ignored (don’t care)</span>}</div>
+      <div className="font-mono">ALU control = <b className="text-teal">{out}</b> ({ALU_NAME[out] ?? 'undefined combination'}) {aluop !== '10' && <span className="text-muted text-xs">(funct fields ignored, don’t care)</span>}</div>
       <div className="overflow-x-auto">
         <table className="text-xs font-mono w-full">
           <thead className="text-muted"><tr>{['Instruction', 'ALUOp', 'funct7', 'funct3', 'operation', 'ALU control'].map((h) => <th key={h} className="text-left py-1 pr-3">{h}</th>)}</tr></thead>

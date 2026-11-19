@@ -191,7 +191,7 @@ export default function Datapath({ op = null, trace = null, maxStage = 7, select
           <g key={c.id} data-click tabIndex={onSelect ? 0 : -1} role={onSelect ? 'button' : undefined} aria-label={c.name}
             onClick={() => onSelect?.(c.id)} onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && onSelect) { e.preventDefault(); onSelect(c.id); } }}
             className={onSelect ? 'cursor-pointer outline-none' : ''}>
-            <title>{c.name} — {c.role}</title>
+            <title>{c.name}: {c.role}</title>
             {shape}
             {b.label.map((l, k) => (
               <text key={k} x={b.x + (b.shape === 'alu' || b.shape === 'adder' ? b.w * 0.6 : b.w / 2)} y={ty + k * 14} textAnchor="middle" fontSize={b.shape === 'mux' ? 10 : 12} fontWeight={600} fill="rgb(var(--ink))" className="pointer-events-none">{l}</text>

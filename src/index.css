@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 246 247 250; --surface: 255 255 255; --raised: 239 241 246; --line: 222 226 234;
+  --ink: 17 22 34; --muted: 92 102 122;
+  --accent: 37 99 235; --teal: 13 148 136; --ok: 22 163 74; --warn: 217 119 6; --bad: 220 38 38;
+  --s-if: 59 130 246; --s-id: 139 92 246; --s-ex: 236 72 153; --s-mem: 245 158 11; --s-wb: 16 185 129;
+  color-scheme: light;
+}
+.dark {
+  --bg: 11 15 25; --surface: 17 23 36; --raised: 25 32 48; --line: 37 46 66;
+  --ink: 230 234 243; --muted: 142 152 174;
+  --accent: 96 145 255; --teal: 45 212 191; --ok: 74 222 128; --warn: 251 191 36; --bad: 248 113 113;
+  --s-if: 96 165 250; --s-id: 167 139 250; --s-ex: 244 114 182; --s-mem: 251 191 36; --s-wb: 52 211 153;
+  color-scheme: dark;
+}
+html, body, #root { height: 100%; }
+body { @apply bg-bg text-ink font-sans antialiased; }
+*:focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 2px; border-radius: 4px; }
+.card { @apply bg-surface border border-line rounded-xl; }
+.btn { @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium border border-line bg-surface hover:bg-raised transition-colors disabled:opacity-40 disabled:cursor-not-allowed; }
+.btn-primary { @apply bg-accent text-white border-transparent hover:bg-accent/90; }
+.chip { @apply inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium; }
+.input { @apply bg-bg border border-line rounded-lg px-2 py-1 text-sm font-mono w-full; }
+.prose-lite p { @apply leading-relaxed text-[15px]; }
+.prose-lite p + p { @apply mt-2; }
+.prose-lite code, code.k { @apply font-mono text-[0.85em] bg-raised px-1 py-0.5 rounded; }
+.wire { transition: stroke 0.25s, stroke-width 0.25s, opacity 0.25s; }
+.flow { stroke-dasharray: 6 6; animation: flow 0.9s linear infinite; }
+@keyframes flow { to { stroke-dashoffset: -12; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  .flow { animation: none; }
+}

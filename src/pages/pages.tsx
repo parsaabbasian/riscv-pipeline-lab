@@ -59,6 +59,7 @@ export function HomePage() {
         </div>
         <div className="mt-6 flex gap-1" aria-hidden>{['IF', 'ID', 'EX', 'MEM', 'WB'].map((s, i) => <div key={s} className={`${STAGE_COLOR[s]} h-1.5 rounded-full`} style={{ flex: 1, opacity: 0.4 + i * 0.15 }} />)}</div>
       </div>
+      {done === 0 && <StartHere />}
       <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
         {tools.map((t) => (
           <Link key={t.to} to={t.to} className="card p-4 hover:border-accent/50 transition-colors group">
@@ -92,6 +93,47 @@ export function HomePage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+const STORY = [
+  { t: 'A CPU follows instructions', d: 'Each instruction is a tiny command like “add two numbers”. Modules 1–2.' },
+  { t: 'It is built from simple parts', d: 'Wires, switches (MUXes), adders and memory cells. Module 3.' },
+  { t: 'We connect the parts into a CPU', d: 'First a simple one that does one instruction per clock tick. Modules 4–6.' },
+  { t: 'Then we make it faster', d: 'Like a factory assembly line: start the next instruction before the last one finishes. Module 7.' },
+  { t: 'And fix the problems that causes', d: 'Sometimes an instruction must wait (“hazards”). Modules 8–10.' },
+];
+
+function StartHere() {
+  const setMode = useApp((s) => s.setMode);
+  const mode = useApp((s) => s.mode);
+  return (
+    <Card title="New here? Start with this">
+      <div className="grid lg:grid-cols-2 gap-6">
+        <div>
+          <div className="text-sm font-semibold mb-2">The whole lecture in five sentences</div>
+          <ol className="space-y-2">
+            {STORY.map((s, i) => (
+              <li key={i} className="flex gap-3">
+                <span className="w-6 h-6 rounded-full bg-accent/10 text-accent text-xs font-bold flex items-center justify-center shrink-0">{i + 1}</span>
+                <div className="text-sm"><span className="font-medium">{s.t}.</span> <span className="text-muted">{s.d}</span></div>
+              </li>
+            ))}
+          </ol>
+        </div>
+        <div>
+          <div className="text-sm font-semibold mb-2">How to use this app</div>
+          <ul className="space-y-2 text-sm text-muted list-disc pl-5">
+            <li>Go through the modules <b className="text-ink">in order</b> — each one only uses words explained before.</li>
+            <li>Every topic is a short list of steps. Read the plain-English part first; the technical part is optional at first.</li>
+            <li>Diagrams are <b className="text-ink">interactive</b>: change the numbers and watch what happens. You can’t break anything.</li>
+            <li>Answer the question at the end of each topic — a correct answer marks it complete.</li>
+            <li>Unknown word? Check the <Link to="/glossary" className="text-accent">Glossary</Link>.</li>
+          </ul>
+          {mode !== 'beginner' && <button className="btn mt-3" onClick={() => setMode('beginner')}>Switch to Beginner mode (explains everything)</button>}
+        </div>
+      </div>
+    </Card>
   );
 }
 
@@ -136,9 +178,15 @@ function TopicCheck({ t }: { t: Topic }) {
   return <QuestionCard q={q} onAnswered={(ok) => { if (ok) toggle(t.id, true); }} />;
 }
 
+function oneLiner(s: string) {
+  const i = s.indexOf('. ');
+  return i > 0 ? s.slice(0, i + 1) : s;
+}
+
 function TopicView({ t }: { t: Topic }) {
   const { mode, completed, toggleComplete, setLastLesson } = useApp();
   const [showViz, setShowViz] = useState(mode !== 'exam');
+  const [showTech, setShowTech] = useState(false);
   useEffect(() => setShowViz(mode !== 'exam'), [mode]);
   const W = t.widget ? WIDGETS[t.widget] : null;
   const beginner = mode === 'beginner', exam = mode === 'exam';
@@ -154,11 +202,14 @@ function TopicView({ t }: { t: Topic }) {
         </button>
       </header>
       <div className="p-5 space-y-5">
+        {!exam && <div className="rounded-lg bg-accent/5 border border-accent/30 px-4 py-3 text-[15px]"><span className="text-xs font-semibold uppercase tracking-wide text-accent mr-2">In one sentence</span>{oneLiner(t.simple)}</div>}
         {!exam && <Step n={++k} title="Why does this exist?"><p>{t.why}</p></Step>}
         {beginner && <Step n={++k} title="Real-world analogy"><p>{t.analogy}</p></Step>}
         {!exam && <Step n={++k} title="In simple English"><p>{t.simple}</p></Step>}
         <Step n={++k} title={exam ? 'Technical summary' : 'The technical picture'}>
-          <p>{t.technical}</p>
+          {beginner && !showTech ? (
+            <button className="btn !text-xs" onClick={() => setShowTech(true)}><Eye className="w-3.5 h-3.5" />Show the technical version (optional on first read)</button>
+          ) : <p>{t.technical}</p>}
           {t.terms && !exam && (
             <dl className="mt-3 grid sm:grid-cols-2 gap-2">
               {t.terms.map(([a, b]) => <div key={a} className="rounded-lg bg-raised p-2 text-sm"><dt className="font-semibold">{a}</dt><dd className="text-muted">{b}</dd></div>)}
@@ -244,11 +295,13 @@ const PRESETS: Record<string, { label: string; p: { program: string; regs?: stri
 
 export function PipelinePage() {
   const [preset, setPreset] = useState('ldsd');
+  const beginner = useApp((s) => s.mode) === 'beginner';
   return (
     <div className="space-y-4">
+      {beginner && <div className="mb-4"><Callout kind="tip" title="Tip">New to pipelines? Read Module 7 first. Then press <b>Next</b> here a few times and follow the plain-English panel. Advanced switches appear in Standard mode.</Callout></div>}
       <PageHead kicker="Flagship" title="Pipeline Simulator">A cycle-accurate model of the five-stage RISC-V pipeline: pipeline registers, hazard detection, forwarding unit, load-use stalls, branch resolution in ID with stall or predict-not-taken. Every value shown is computed from the program and initial state; Prev/Next replays deterministic snapshots.</PageHead>
       <div className="flex flex-wrap gap-1">{Object.entries(PRESETS).map(([k, v]) => <button key={k} className={`btn !text-xs ${preset === k ? 'btn-primary' : ''}`} onClick={() => setPreset(k)}>{v.label}</button>)}</div>
-      <div className="card p-4"><PipelineRunner key={preset} persist {...PRESETS[preset].p} show={{ options: ['forwarding', 'branchPolicy', 'unifiedMemory', 'buggyWriteRegister'] }} /></div>
+      <div className="card p-4"><PipelineRunner key={preset} persist {...PRESETS[preset].p} show={{ options: beginner ? ['forwarding', 'branchPolicy'] : ['forwarding', 'branchPolicy', 'unifiedMemory', 'buggyWriteRegister'] }} /></div>
     </div>
   );
 }

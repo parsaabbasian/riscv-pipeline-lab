@@ -25,7 +25,7 @@ interface AppState {
 export const useApp = create<AppState>()(
   persist(
     (set) => ({
-      theme: 'dark', mode: 'standard', completed: {}, quiz: {}, lastLesson: null, simSpeed: 700, forwarding: true,
+      theme: 'dark', mode: 'beginner', completed: {}, quiz: {}, lastLesson: null, simSpeed: 700, forwarding: true,
       setTheme: (theme) => {
         document.documentElement.classList.toggle('dark', theme === 'dark');
         try { localStorage.setItem('rv-theme', theme); } catch { /* ignore */ }

@@ -87,10 +87,10 @@ export default function App() {
         <span className="chip bg-raised text-muted hidden md:inline-flex whitespace-nowrap">Lecture 8</span>
         <div className="flex-1" />
         <GlobalSearch />
-        <div className="hidden sm:flex items-center gap-2 text-xs text-muted" title="Lessons completed">
+        <div className="hidden lg:flex items-center gap-2 text-xs text-muted" title="Lessons completed">
           <div className="w-24 h-1.5 bg-raised rounded-full overflow-hidden"><div className="h-full bg-ok" style={{ width: `${pct}%` }} /></div>{pct}%
         </div>
-        <div className="hidden sm:block"><Segmented label="Learning mode" value={mode} onChange={(v: Mode) => setMode(v)} options={[{ value: 'beginner', label: 'Beginner' }, { value: 'standard', label: 'Standard' }, { value: 'exam', label: 'Exam' }]} /></div>
+        <div className="hidden sm:block shrink-0 [&>div]:flex-nowrap"><Segmented label="Learning mode" value={mode} onChange={(v: Mode) => setMode(v)} options={[{ value: 'beginner', label: 'Beginner' }, { value: 'standard', label: 'Standard' }, { value: 'exam', label: 'Exam' }]} /></div>
         <select className="input !w-auto !font-sans sm:hidden" value={mode} onChange={(e) => setMode(e.target.value as Mode)} aria-label="Learning mode">
           <option value="beginner">Beginner</option><option value="standard">Standard</option><option value="exam">Exam</option>
         </select>

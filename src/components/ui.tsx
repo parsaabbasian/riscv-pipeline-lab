@@ -87,7 +87,15 @@ export function ZoomPan({ width, height, children, className = '', minH = 260 }:
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
-    <div className={`relative rounded-lg border border-line bg-bg overflow-hidden ${className}`}>
+    <div className={`rounded-lg border border-line bg-bg overflow-hidden ${className}`}>
+      <div className="flex items-center justify-between gap-2 px-2 py-1 border-b border-line bg-surface/60">
+        <span className="text-[10px] text-muted">Drag to move · Ctrl + scroll or the buttons to zoom</span>
+        <div className="flex gap-1">
+          <button className="btn !px-1.5 !py-0.5" onClick={() => zoom(0.8)} aria-label="Zoom in"><Plus className="w-3.5 h-3.5" /></button>
+          <button className="btn !px-1.5 !py-0.5" onClick={() => zoom(1.25)} aria-label="Zoom out"><Minus className="w-3.5 h-3.5" /></button>
+          <button className="btn !px-1.5 !py-0.5" onClick={reset} aria-label="Reset view"><RotateCcw className="w-3.5 h-3.5" /></button>
+        </div>
+      </div>
       <svg ref={ref} viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`} className="w-full h-auto touch-none cursor-grab active:cursor-grabbing" style={{ minHeight: minH }}
         role="img"
         onPointerDown={(e) => { if ((e.target as Element).closest('[data-click]')) return; drag.current = { px: e.clientX, py: e.clientY, vx: vb.x, vy: vb.y }; (e.currentTarget as Element).setPointerCapture(e.pointerId); }}
@@ -100,12 +108,6 @@ export function ZoomPan({ width, height, children, className = '', minH = 260 }:
         onPointerUp={() => { drag.current = null; }}>
         {children}
       </svg>
-      <div className="absolute right-2 top-2 flex gap-1">
-        <button className="btn !px-1.5 !py-1" onClick={() => zoom(0.8)} aria-label="Zoom in"><Plus className="w-3.5 h-3.5" /></button>
-        <button className="btn !px-1.5 !py-1" onClick={() => zoom(1.25)} aria-label="Zoom out"><Minus className="w-3.5 h-3.5" /></button>
-        <button className="btn !px-1.5 !py-1" onClick={reset} aria-label="Reset view"><RotateCcw className="w-3.5 h-3.5" /></button>
-      </div>
-      <div className="absolute left-2 bottom-1.5 text-[10px] text-muted pointer-events-none hidden sm:block">drag to pan · ctrl+scroll to zoom</div>
     </div>
   );
 }

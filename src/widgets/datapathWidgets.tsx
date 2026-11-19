@@ -118,9 +118,9 @@ export function ControlDashboard() {
         <label>x3 <input type="number" className="input !w-20 inline" value={x3} onChange={(e) => setX3(+e.target.value | 0)} /></label>
         <span className="text-muted">ALU control = {t.aluCtrl} ({ALU_NAME[t.aluCtrl]}) · ALU result = {t.aluResult} · next PC = {t.nextPc}</span>
       </div>
-      <div className="grid xl:grid-cols-[1fr_360px] gap-3">
+      <div className="grid 2xl:grid-cols-[1fr_360px] gap-3">
         <Datapath op={op} trace={t} signals={sig} focusSignal={focus} />
-        <div className="card divide-y divide-line">
+        <div className="card divide-y divide-line 2xl:divide-y grid sm:grid-cols-2 2xl:grid-cols-1 2xl:block">
           {Object.entries(sig).map(([k, v]) => (
             <button key={k} onMouseEnter={() => setFocus(k)} onFocus={() => setFocus(k)} onMouseLeave={() => setFocus(null)} className="w-full text-left px-3 py-2 hover:bg-raised">
               <div className="flex items-center justify-between">
@@ -155,12 +155,12 @@ export function CriticalPath() {
       </div>
       {rows.map(([n, ks], i) => (
         <div key={n} className="flex items-center gap-2">
-          <div className="w-20 font-mono text-xs">{n}</div>
+          <div className="w-20 shrink-0 font-mono text-xs">{n}</div>
           <div className="flex-1 relative h-6 bg-raised rounded">
-            <div className="absolute inset-y-0 left-0 flex">{ks.map((k) => <div key={k} className={`${col[k]} h-6 border-r border-bg`} style={{ width: `${(d[k] / max) * 100}%`, minWidth: 0 }} title={`${lbl[k]} ${d[k]} ps`} />)}</div>
-            <div className="absolute inset-y-0 left-0 border-r-2 border-dashed border-warn" style={{ width: '100%' }} />
+            <div className="absolute inset-0 flex">{ks.map((k) => <div key={k} className={`${col[k]} h-6 border-r border-bg`} style={{ width: `${(d[k] / max) * 100}%`, minWidth: 0 }} title={`${lbl[k]} ${d[k]} ps`} />)}</div>
+            
           </div>
-          <div className={`w-28 font-mono text-xs ${tot[i] === max ? 'text-warn font-bold' : ''}`}>{tot[i]} ps{tot[i] === max ? ' ← critical' : ` (idle ${max - tot[i]})`}</div>
+          <div className={`w-40 shrink-0 whitespace-nowrap font-mono text-xs ${tot[i] === max ? 'text-warn font-bold' : ''}`}>{tot[i]} ps{tot[i] === max ? ' ← critical' : ` (idle ${max - tot[i]})`}</div>
         </div>
       ))}
       <p>Single-cycle clock period = <b>{max} ps</b>. Every instruction pays it, even when it finishes earlier, so the idle time is wasted.</p>
@@ -195,8 +195,8 @@ export function SingleVsMulti() {
         <div className="card p-3 space-y-2">
           <div className="font-semibold">Multicycle</div>
           <div className="text-xs text-muted">Short clock; one shared memory and one ALU reused in different cycles; IR, MDR, A, B, ALUOut hold values between steps.</div>
-          <div className="flex gap-1">{ms.map((m, i) => (
-            <button key={i} onClick={() => setStep(i)} className={`flex-1 h-8 rounded text-[10px] font-semibold ${i === step ? 'bg-teal text-white' : i < step ? 'bg-teal/30' : 'bg-raised'}`}>{i + 1}. {m.name}</button>
+          <div className="flex flex-wrap gap-1">{ms.map((m, i) => (
+            <button key={i} onClick={() => setStep(i)} className={`flex-1 min-w-[72px] px-1 py-1.5 leading-tight rounded text-[10px] font-semibold ${i === step ? 'bg-teal text-white' : i < step ? 'bg-teal/30' : 'bg-raised'}`}>{i + 1}. {m.name}</button>
           ))}</div>
           <div className="rounded bg-raised p-2 font-mono text-xs">{cur.rtl}</div>
           <div className="flex flex-wrap gap-1">{['PC', 'Memory', 'IR', 'MDR', 'Registers', 'A', 'B', 'ImmGen', 'ALU', 'ALUOut'].map((u) => <span key={u} className={`chip ${cur.units.includes(u) ? 'bg-teal/20 text-teal' : 'bg-raised text-muted'}`}>{u}</span>)}</div>

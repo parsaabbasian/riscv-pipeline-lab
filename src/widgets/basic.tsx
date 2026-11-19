@@ -77,14 +77,14 @@ export function MuxSim() {
         <Segmented label="Select S" value={String(s)} onChange={(v) => setS(+v)} options={[{ value: '0', label: 'S = 0' }, { value: '1', label: 'S = 1' }]} />
       </div>
       <ZoomPan width={520} height={220} minH={180}>
-        <path d="M 40 70 L 220 70" stroke={s === 0 ? 'rgb(var(--accent))' : 'rgb(var(--line))'} strokeWidth={s === 0 ? 3 : 1.5} className="wire" />
-        <path d="M 40 150 L 220 150" stroke={s === 1 ? 'rgb(var(--accent))' : 'rgb(var(--line))'} strokeWidth={s === 1 ? 3 : 1.5} className="wire" />
+        <path d="M 40 70 L 220 70" stroke={s === 0 ? 'rgb(var(--accent))' : 'rgb(var(--muted))'} opacity={s === 0 ? 1 : 0.45} strokeWidth={s === 0 ? 3 : 1.5} className="wire" />
+        <path d="M 40 150 L 220 150" stroke={s === 1 ? 'rgb(var(--accent))' : 'rgb(var(--muted))'} opacity={s === 1 ? 1 : 0.45} strokeWidth={s === 1 ? 3 : 1.5} className="wire" />
         <text x={40} y={60} fontFamily="JetBrains Mono" fontSize={14} fill="rgb(var(--ink))">I0 = {i0}</text>
         <text x={40} y={140} fontFamily="JetBrains Mono" fontSize={14} fill="rgb(var(--ink))">I1 = {i1}</text>
         <path d="M 220 40 L 290 70 L 290 150 L 220 180 Z" fill="rgb(var(--accent) / 0.1)" stroke="rgb(var(--accent))" strokeWidth={2} />
         <text x={248} y={115} fontWeight={700} fill="rgb(var(--ink))">M</text>
         <text x={228} y={75} fontSize={11} fill="rgb(var(--muted))">0</text><text x={228} y={155} fontSize={11} fill="rgb(var(--muted))">1</text>
-        <path d={`M ${s ? 222 : 222} ${s ? 150 : 70} L 288 110`} stroke="rgb(var(--teal))" strokeWidth={2} strokeDasharray="4 3" />
+        <path d={`M 240 ${s ? 146 : 74} L 288 110`} stroke="rgb(var(--teal))" strokeWidth={2} strokeDasharray="4 3" />
         <path d="M 255 210 L 255 165" stroke="rgb(var(--teal))" strokeWidth={2} />
         <text x={264} y={208} fontSize={13} fontFamily="JetBrains Mono" fill="rgb(var(--teal))">S = {s}</text>
         <path d="M 290 110 L 470 110" stroke="rgb(var(--ok))" strokeWidth={3} />
@@ -225,13 +225,18 @@ export function ClockSim() {
       <p>A path from one state element through combinational logic to the next. Edit the delays and the clock period:</p>
       <div className="flex flex-wrap gap-2">{delays.map((d, i) => numIn(d, (n) => setDelays(delays.map((x, j) => (j === i ? Math.max(0, n) : x))), names[i] + ' ps'))}</div>
       <div className="flex items-center gap-3">{numIn(period, setPeriod, 'Clock period (ps)')}<span>= {(1e3 / Math.max(1, period)).toFixed(2)} GHz</span></div>
-      <div className="relative h-16 rounded-lg bg-bg border border-line overflow-hidden">
+      <div className="relative h-16 rounded-lg bg-bg border border-line overflow-hidden mx-2">
         {delays.reduce<{ x: number; els: JSX.Element[] }>((acc, d, i) => {
           const w = (d / Math.max(total, period)) * 100;
-          acc.els.push(<div key={i} className="absolute top-2 h-6 rounded text-[10px] text-white flex items-center justify-center bg-accent/80 border-r border-bg overflow-hidden" style={{ left: `${acc.x}%`, width: `${w}%` }}>{names[i]}</div>);
+          acc.els.push(<div key={i} className={`absolute top-2 h-6 text-[10px] text-white flex items-center justify-center border-r-2 border-bg overflow-hidden ${['bg-sif', 'bg-sid', 'bg-sex', 'bg-smem', 'bg-swb'][i]}`} style={{ left: `${acc.x}%`, width: `${w}%` }}>{names[i]}</div>);
           acc.x += w; return acc;
         }, { x: 0, els: [] }).els}
         <div className="absolute top-9 h-5 border-r-2 border-dashed border-warn text-[10px] text-warn pr-1 text-right" style={{ left: 0, width: `${(period / Math.max(total, period)) * 100}%` }}>next rising edge at {period} ps</div>
+      </div>
+      <div className="relative h-4 text-[10px] text-muted font-mono mx-2" aria-label="time in picoseconds">
+        {Array.from({ length: Math.floor(Math.max(total, period) / 200) + 1 }, (_, i) => (
+          <span key={i} className="absolute -translate-x-1/2" style={{ left: `${((i * 200) / Math.max(total, period)) * 100}%` }}>{i * 200}</span>
+        ))}
       </div>
       <div className={ok ? 'text-ok' : 'text-bad'}>{ok ? `OK: the critical path (${total} ps) finishes before the next edge.` : `Timing violation: the critical path needs ${total} ps but the clock edge arrives at ${period} ps, so the register would capture a wrong (unfinished) value.`}</div>
     </div>

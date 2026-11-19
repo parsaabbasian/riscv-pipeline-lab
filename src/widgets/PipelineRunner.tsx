@@ -124,49 +124,56 @@ export function StageStrip({ st }: { st: PipeState }) {
 
 /** Pipelined datapath with pipeline-register contents (slides 54–61). */
 export function PipeDatapathView({ st, buggy }: { st: PipeState; buggy?: boolean }) {
-  const X = [20, 205, 390, 575, 760];
+  const SX = (k: number) => 10 + k * 202; // stage box x
+  const SW = 150;
+  const barX = (k: number) => SX(k) + SW + 6; // pipeline register bar between stage k and k+1
   const latch = [
-    { name: 'IF/ID', x: 178, rows: st.ifid ? [`inst: ${st.ifid.d.instr.text}`, `PC: ${st.ifid.d.pc}`] : [st.bub.ID ? 'bubble' : 'empty'] },
-    { name: 'ID/EX', x: 363, rows: st.idex ? [`${st.idex.d.instr.text}`, `RD1: ${st.idex.rd1}`, `RD2: ${st.idex.rd2}`, `imm: ${st.idex.imm}`, `rd: x${st.idex.rd}`, `ALUSrc=${st.idex.ctrl.ALUSrc} RW=${st.idex.ctrl.RegWrite}`] : [st.bub.EX ? 'bubble (ctrl = 0)' : 'empty'] },
-    { name: 'EX/MEM', x: 548, rows: st.exmem ? [`${st.exmem.d.instr.text}`, `ALU: ${st.exmem.aluResult}`, `Zero: ${st.exmem.zero ? 1 : 0}`, `store: ${st.exmem.storeData}`, `rd: x${st.exmem.rd}`, `MR=${st.exmem.ctrl.MemRead} MW=${st.exmem.ctrl.MemWrite}`] : [st.bub.MEM ? 'bubble' : 'empty'] },
-    { name: 'MEM/WB', x: 733, rows: st.memwb ? [`${st.memwb.d.instr.text}`, `mem: ${st.memwb.memData ?? '-'}`, `ALU: ${st.memwb.aluResult}`, `rd: x${st.memwb.rd}`, `RW=${st.memwb.ctrl.RegWrite} M2R=${st.memwb.ctrl.MemtoReg}`] : [st.bub.WB ? 'bubble' : 'empty'] },
+    { name: 'IF/ID', rows: st.ifid ? [['instruction', st.ifid.d.instr.text], ['PC', `${st.ifid.d.pc}`]] : null, bub: st.bub.ID },
+    { name: 'ID/EX', rows: st.idex ? [['instruction', st.idex.d.instr.text], ['Read data 1', `${st.idex.rd1}`], ['Read data 2', `${st.idex.rd2}`], ['immediate', `${st.idex.imm}`], ['rd', `x${st.idex.rd}`], ['ALUSrc', `${st.idex.ctrl.ALUSrc}`], ['RegWrite', `${st.idex.ctrl.RegWrite}`]] : null, bub: st.bub.EX },
+    { name: 'EX/MEM', rows: st.exmem ? [['instruction', st.exmem.d.instr.text], ['ALU result', `${st.exmem.aluResult}`], ['Zero', `${st.exmem.zero ? 1 : 0}`], ['store data', `${st.exmem.storeData}`], ['rd', `x${st.exmem.rd}`], ['MemRead', `${st.exmem.ctrl.MemRead}`], ['MemWrite', `${st.exmem.ctrl.MemWrite}`]] : null, bub: st.bub.MEM },
+    { name: 'MEM/WB', rows: st.memwb ? [['instruction', st.memwb.d.instr.text], ['memory data', `${st.memwb.memData ?? '-'}`], ['ALU result', `${st.memwb.aluResult}`], ['rd', `x${st.memwb.rd}`], ['RegWrite', `${st.memwb.ctrl.RegWrite}`], ['MemtoReg', `${st.memwb.ctrl.MemtoReg}`]] : null, bub: st.bub.WB },
   ];
-  const names = ['Instruction fetch', 'Decode / reg read', 'Execute / address', 'Memory access', 'Write back'];
+  const names = ['Instruction fetch', 'Decode / register read', 'Execute / address', 'Memory access', 'Write back'];
   const nextWb = st.memwb && st.memwb.ctrl.RegWrite === 1;
+  const CW = 192, CY = 140, RH = 17;
   return (
-    <ZoomPan width={940} height={330} minH={220}>
-      <text x={20} y={318} fontSize={10} fill="rgb(var(--muted))">Contents latched at the END of cycle {st.cycle} (what each stage will use in cycle {st.cycle + 1})</text>
+    <ZoomPan width={1000} height={390} minH={240}>
+      <defs><marker id="arrW" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="rgb(var(--s-wb))" /></marker></defs>
       {STAGES.map((s, k) => (
         <g key={s}>
-          <rect x={X[k]} y={20} width={150} height={270} rx={10} fill={STAGE_STROKE[s].replace('))', ') / 0.08)')} stroke={STAGE_STROKE[s]} strokeWidth={1.2} />
-          <text x={X[k] + 10} y={40} fontWeight={700} fontSize={14} fill={STAGE_STROKE[s]}>{s}</text>
-          <text x={X[k] + 10} y={56} fontSize={10} fill="rgb(var(--muted))">{names[k]}</text>
-          <text x={X[k] + 10} y={84} fontSize={11} fontFamily="JetBrains Mono" fill="rgb(var(--ink))">{st.occupancy[s]?.instr.text ?? (st.marks[s] === 'bubble' ? 'bubble' : '-')}</text>
+          <rect x={SX(k)} y={14} width={SW} height={96} rx={10} fill={STAGE_STROKE[s].replace('))', ') / 0.1)')} stroke={STAGE_STROKE[s]} strokeWidth={1.4} />
+          <text x={SX(k) + 12} y={36} fontWeight={700} fontSize={15} fill={STAGE_STROKE[s]}>{s}</text>
+          <text x={SX(k) + 12} y={52} fontSize={10.5} fill="rgb(var(--muted))">{names[k]}</text>
+          <text x={SX(k) + 12} y={88} fontSize={12.5} fontFamily="JetBrains Mono" fill={st.marks[s] === 'bubble' ? 'rgb(var(--warn))' : 'rgb(var(--ink))'}>{st.occupancy[s]?.instr.text ?? (st.marks[s] === 'bubble' ? 'bubble' : 'empty')}</text>
         </g>
       ))}
-      {latch.map((l) => (
-        <g key={l.name}>
-          <rect x={l.x} y={100} width={50} height={190} rx={4} fill="rgb(var(--raised))" stroke="rgb(var(--muted))" />
-          <text x={l.x + 25} y={95} textAnchor="middle" fontSize={10} fontWeight={700} fill="rgb(var(--ink))">{l.name}</text>
-        </g>
-      ))}
-      {latch.map((l) => (
-        <g key={l.name + 't'}>
-          {l.rows.map((r, i) => (
-            <text key={i} x={l.x - 18} y={118 + i * 15} fontSize={9.5} fontFamily="JetBrains Mono" fill={i === 0 ? 'rgb(var(--accent))' : 'rgb(var(--ink))'}>
-              <tspan style={{ paintOrder: 'stroke' }} stroke="rgb(var(--bg))" strokeWidth={3}>{r}</tspan>
-            </text>
-          ))}
-        </g>
-      ))}
-      {/* write-back path to register file in ID */}
-      <path d="M 910 280 L 930 280 L 930 305 L 280 305 L 280 290" fill="none" stroke={nextWb ? 'rgb(var(--s-wb))' : 'rgb(var(--line))'} strokeWidth={nextWb ? 2.4 : 1.2} markerEnd="url(#arrW)" />
-      <defs><marker id="arrW" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="rgb(var(--s-wb))" /></marker></defs>
+      {latch.map((l, k) => {
+        const bx = barX(k), cx = bx + 20 - CW / 2;
+        const rows = l.rows ?? [['', l.bub ? 'bubble (all control = 0)' : 'empty']];
+        return (
+          <g key={l.name}>
+            <rect x={bx} y={14} width={40} height={96} rx={4} fill="rgb(var(--raised))" stroke="rgb(var(--muted))" />
+            <text x={bx + 20} y={66} textAnchor="middle" fontSize={10} fontWeight={700} fill="rgb(var(--ink))" transform={`rotate(-90 ${bx + 20} 62)`}>{l.name}</text>
+            <line x1={bx + 20} x2={bx + 20} y1={110} y2={CY} stroke="rgb(var(--muted))" strokeDasharray="3 3" />
+            <rect x={cx} y={CY} width={CW} height={26 + rows.length * RH} rx={8} fill="rgb(var(--surface))" stroke="rgb(var(--line))" />
+            <text x={cx + 10} y={CY + 17} fontSize={11} fontWeight={700} fill="rgb(var(--ink))">{l.name} contents</text>
+            {rows.map(([k2, v], i) => (
+              <g key={i} fontSize={10.5} fontFamily="JetBrains Mono">
+                <text x={cx + 10} y={CY + 36 + i * RH} fill="rgb(var(--muted))">{k2}</text>
+                <text x={cx + CW - 10} y={CY + 36 + i * RH} textAnchor="end" fill={i === 0 && l.rows ? 'rgb(var(--accent))' : 'rgb(var(--ink))'}>{v}</text>
+              </g>
+            ))}
+          </g>
+        );
+      })}
+      <path d={`M ${SX(4) + SW} 62 L ${SX(4) + SW + 16} 62 L ${SX(4) + SW + 16} 352 L ${SX(1) + 75} 352 L ${SX(1) + 75} 113`} fill="none" stroke={nextWb ? 'rgb(var(--s-wb))' : 'rgb(var(--line))'} strokeWidth={nextWb ? 2.2 : 1.2} markerEnd="url(#arrW)" />
+      <text x={SX(1) + 85} y={346} fontSize={10.5} fill="rgb(var(--muted))">write-back path into the register file (in ID)</text>
       {nextWb && (
-        <text x={560} y={300} fontSize={10} fontFamily="JetBrains Mono" fill={buggy ? 'rgb(var(--bad))' : 'rgb(var(--s-wb))'}>
-          next WB: Write register = {buggy ? `IF/ID.rd = x${st.ifid?.d.instr.rd ?? st.memwb!.rd} ✗` : `MEM/WB.rd = x${st.memwb!.rd} ✓`}
+        <text x={SX(4) + SW + 6} y={378} textAnchor="end" fontSize={11} fontFamily="JetBrains Mono" fontWeight={600} fill={buggy ? 'rgb(var(--bad))' : 'rgb(var(--s-wb))'}>
+          next write: register = {buggy ? `IF/ID.rd = x${st.ifid?.d.instr.rd ?? st.memwb!.rd}  (wrong!)` : `MEM/WB.rd = x${st.memwb!.rd}  (correct)`}
         </text>
       )}
+      <text x={10} y={378} fontSize={10.5} fill="rgb(var(--muted))">Contents saved at the end of cycle {st.cycle}, used during cycle {st.cycle + 1}</text>
     </ZoomPan>
   );
 }
@@ -194,11 +201,11 @@ export default function PipelineRunner({ program, regs = '', mem = '', opts: o0,
   return (
     <div className="space-y-3">
       {title && <h4 className="font-semibold">{title}</h4>}
-      <div className={`grid gap-3 ${editor ? 'lg:grid-cols-[280px_1fr]' : ''}`}>
+      <div className={`grid gap-3 ${editor ? '2xl:grid-cols-[280px_1fr]' : ''}`}>
         {editor && (
           <div className="space-y-2">
             <label className="text-xs text-muted flex items-center gap-1"><PenLine className="w-3 h-3" />Program (add, sub, and, or, ld, sd, beq, nop; labels ok)</label>
-            <textarea className="input h-40 resize-y" spellCheck={false} value={src} onChange={(e) => setSrc(e.target.value)} aria-label="Assembly program" />
+            <textarea className="input h-32 2xl:h-40 resize-y" spellCheck={false} value={src} onChange={(e) => setSrc(e.target.value)} aria-label="Assembly program" />
             <label className="text-xs text-muted">Initial registers (e.g. x2=10, x3=5)</label>
             <input className="input" value={regsS} onChange={(e) => setRegs(e.target.value)} aria-label="Initial registers" />
             <label className="text-xs text-muted">Initial memory (byte address=value)</label>

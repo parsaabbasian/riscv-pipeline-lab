@@ -18,6 +18,15 @@ export function Laundry() {
       </div>
       <div className="overflow-x-auto">
         <div className="min-w-[520px] space-y-1">
+          <div className="flex items-center gap-1">
+            <div className="w-14 text-[10px] text-muted">time</div>
+            <div className="flex-1 grid gap-px" style={{ gridTemplateColumns: `repeat(${slots}, 1fr)` }}>
+              {Array.from({ length: slots }, (_, s2) => {
+                const m = 18 * 60 + s2 * 30;
+                return <div key={s2} className="text-[9px] text-muted text-center">{`${Math.floor(m / 60) % 12 || 12}:${String(m % 60).padStart(2, '0')}`}</div>;
+              })}
+            </div>
+          </div>
           {Array.from({ length: n }, (_, i) => (
             <div key={i} className="flex items-center gap-1">
               <div className="w-14 text-xs font-mono">Load {String.fromCharCode(65 + i)}</div>
@@ -29,7 +38,7 @@ export function Laundry() {
               </div>
             </div>
           ))}
-          <div className="flex text-[10px] text-muted pl-14">each slot = 30 min</div>
+          <div className="flex text-[10px] text-muted pl-14">each column = 30 minutes, starting at 6:00 pm</div>
         </div>
       </div>
       <div className="grid grid-cols-3 gap-2">
@@ -75,8 +84,14 @@ export function PerfCalc() {
         <div>speedup = {sc} / {pp} = <b className="text-accent">{(sc / pp).toFixed(2)}</b> (limit as n → ∞: {single}/{clk} = {maxS.toFixed(2)}; balanced stages would give 5)</div>
         <div>latency of one instruction: single-cycle {single} ps vs pipelined {5 * clk} ps</div>
       </div>
-      <svg viewBox="0 0 520 170" className="w-full max-w-xl" role="img" aria-label="Speedup versus number of instructions">
+      <svg viewBox="0 0 520 172" className="w-full max-w-xl" role="img" aria-label="Speedup versus number of instructions">
         <line x1={40} y1={140} x2={510} y2={140} stroke="rgb(var(--line))" /><line x1={40} y1={10} x2={40} y2={140} stroke="rgb(var(--line))" />
+        {Array.from({ length: Math.ceil(Math.max(5, maxS)) + 1 }, (_, v) => (
+          <g key={v}>
+            <line x1={40} x2={510} y1={140 - (v / Math.max(5, maxS)) * 125} y2={140 - (v / Math.max(5, maxS)) * 125} stroke="rgb(var(--line))" strokeWidth={0.6} />
+            <text x={34} y={143 - (v / Math.max(5, maxS)) * 125} fontSize={9} textAnchor="end" fill="rgb(var(--muted))">{v}×</text>
+          </g>
+        ))}
         <line x1={40} x2={510} y1={140 - (maxS / Math.max(5, maxS)) * 125} y2={140 - (maxS / Math.max(5, maxS)) * 125} stroke="rgb(var(--warn))" strokeDasharray="4 3" />
         <text x={44} y={136 - (maxS / Math.max(5, maxS)) * 125} fontSize={9} fill="rgb(var(--warn))">limit {maxS.toFixed(2)}×</text>
         <polyline fill="none" stroke="rgb(var(--accent))" strokeWidth={2} points={curve.map((c, i) => `${40 + i * 58},${140 - (c.s / Math.max(5, maxS)) * 125}`).join(' ')} />
@@ -87,7 +102,7 @@ export function PerfCalc() {
           </g>
         ))}
         <text x={270} y={168} fontSize={9} textAnchor="middle" fill="rgb(var(--muted))">number of instructions (no stalls)</text>
-        <text x={4} y={14} fontSize={9} fill="rgb(var(--muted))">speedup</text>
+        <text x={44} y={10} fontSize={9} fill="rgb(var(--muted))">speedup</text>
       </svg>
     </div>
   );
@@ -142,8 +157,8 @@ export function BranchLab() {
       </div>
       <div className="flex flex-wrap gap-1">
         {sim.map((s, i) => (
-          <div key={i} className={`w-12 rounded border text-center text-[10px] font-mono py-1 ${s.ok ? 'border-ok/50 bg-ok/10' : 'border-bad/60 bg-bad/15'}`} title={s.state ? `predictor state before: ${s.state}` : ''}>
-            <div className="text-muted">#{i + 1}</div><div>P:{s.pred ? 'T' : 'N'}</div><div className="font-bold">A:{s.act ? 'T' : 'N'}</div>
+          <div key={i} className={`w-[72px] rounded border text-center text-[10px] py-1 ${s.ok ? 'border-ok/50 bg-ok/10' : 'border-bad/60 bg-bad/15'}`} title={s.state ? `predictor state before: ${s.state}` : ''}>
+            <div className="text-muted">branch {i + 1} {s.ok ? '✓' : '✗'}</div><div>guess: {s.pred ? 'taken' : 'not'}</div><div className="font-semibold">real: {s.act ? 'taken' : 'not'}</div>
             {s.state && <div className="text-[8px] text-muted truncate">{s.state}</div>}
           </div>
         ))}
@@ -154,7 +169,7 @@ export function BranchLab() {
         <Stat label="Accuracy" value={sim.length ? `${((correct / sim.length) * 100).toFixed(0)}%` : '-'} tone="accent" />
         <Stat label="Wasted cycles" value={wasted} tone={wasted ? 'bad' : 'ok'} />
       </div>
-      <p className="text-xs text-muted">P = prediction, A = actual. Each misprediction flushes the wrongly fetched instruction(s), costing {penalty} cycle(s) in the lecture’s pipeline with the branch resolved in ID. 1-bit and 2-bit counters are standard implementations of “record recent history” (background beyond the slide).</p>
+      <p className="text-xs text-muted">Green = the guess was right, red = wrong. Each misprediction flushes the wrongly fetched instruction(s), costing {penalty} cycle(s) in the lecture’s pipeline with the branch resolved in ID. 1-bit and 2-bit counters are standard implementations of “record recent history” (background beyond the slide).</p>
     </div>
   );
 }
@@ -174,9 +189,9 @@ export const PROGRAMS = {
 
 export function SchedulingLab() {
   return (
-    <div className="grid 2xl:grid-cols-2 gap-6">
-      <PipelineRunner title="Original order (slide 48), expect 13 cycles" {...PROGRAMS.original} show={{ options: ['forwarding'] }} />
-      <PipelineRunner title="Scheduled order, expect 11 cycles" {...PROGRAMS.scheduled} show={{ options: ['forwarding'] }} />
+    <div className="space-y-8">
+      <PipelineRunner title="Original order (slide 48), expect 13 cycles" {...PROGRAMS.original} show={{ options: ['forwarding'], editor: false }} />
+      <PipelineRunner title="Scheduled order, expect 11 cycles" {...PROGRAMS.scheduled} show={{ options: ['forwarding'], editor: false }} />
     </div>
   );
 }

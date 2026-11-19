@@ -29,28 +29,28 @@ const WIRES: W[] = [
   { id: 'pc_im', pts: [[80, 285], [110, 285]], stage: 1 },
   { id: 'pc_add4', pts: [[90, 285], [90, 80], [150, 80]], stage: 1 },
   { id: 'four', pts: [[128, 108], [150, 108]], stage: 1 },
-  { id: 'add4_mux', pts: [[200, 92], [860, 92], [860, 75], [880, 75]], stage: 1, label: [230, 86] },
+  { id: 'add4_mux', pts: [[200, 92], [218, 92], [218, 54], [860, 54], [860, 75], [880, 75]], stage: 1, label: [232, 48] },
   { id: 'mux_pc', pts: [[902, 92], [965, 92], [965, 18], [22, 18], [22, 285], [40, 285]], stage: 1, label: [500, 13] },
   { id: 'inst', pts: [[220, 285], [252, 285]], stage: 2 },
   { id: 'rs1', pts: [[252, 238], [330, 238]], stage: 2, label: [266, 232] },
   { id: 'rs2', pts: [[252, 266], [330, 266]], stage: 2, label: [266, 260] },
   { id: 'rd', pts: [[252, 296], [330, 296]], stage: 2, label: [266, 291] },
   { id: 'rd1', pts: [[460, 250], [560, 250]], stage: 3, label: [470, 244] },
-  { id: 'rd2_mux', pts: [[460, 318], [492, 318], [510, 318]], stage: 3, label: [466, 312] },
+  { id: 'rd2_mux', pts: [[460, 318], [480, 318], [510, 318]], stage: 3, label: [466, 312] },
   { id: 'wb', pts: [[882, 312], [945, 312], [945, 530], [300, 530], [300, 326], [330, 326]], stage: 3, label: [600, 524] },
   { id: 'alu_wbmux', pts: [[630, 290], [660, 290], [660, 400], [846, 400], [846, 298], [860, 298]], stage: 3 },
   { id: 'inst_imm', pts: [[252, 425], [350, 425]], stage: 4 },
-  { id: 'imm_mux', pts: [[430, 425], [495, 425], [495, 345], [510, 345]], stage: 4, label: [436, 419] },
+  { id: 'imm_mux', pts: [[430, 425], [500, 425], [500, 345], [510, 345]], stage: 4, label: [436, 419] },
   { id: 'mux_alu', pts: [[532, 330], [560, 320]], stage: 3 },
   { id: 'alu_dm', pts: [[630, 290], [700, 290]], stage: 5, label: [636, 284] },
-  { id: 'rd2_dm', pts: [[492, 318], [492, 470], [680, 470], [680, 345], [700, 345]], stage: 5, label: [600, 464] },
+  { id: 'rd2_dm', pts: [[480, 318], [480, 470], [680, 470], [680, 345], [700, 345]], stage: 5, label: [600, 464] },
   { id: 'dm_mux', pts: [[820, 300], [836, 300], [836, 328], [860, 328]], stage: 5, label: [822, 294] },
-  { id: 'imm_shl', pts: [[495, 345], [495, 128], [520, 128]], stage: 6 },
+  { id: 'imm_shl', pts: [[500, 345], [500, 128], [520, 128]], stage: 6 },
   { id: 'shl_badd', pts: [[570, 128], [610, 115]], stage: 6 },
   { id: 'pc_badd', pts: [[90, 80], [90, 34], [590, 34], [590, 85], [610, 85]], stage: 6 },
   { id: 'badd_mux', pts: [[660, 100], [870, 100], [870, 105], [880, 105]], stage: 6, label: [680, 112] },
-  { id: 'zero_and', pts: [[630, 250], [800, 250], [800, 128], [830, 128]], stage: 6, label: [640, 244] },
-  { id: 'and_mux', pts: [[860, 120], [891, 120]], stage: 6 },
+  { id: 'zero_and', pts: [[630, 250], [665, 250], [665, 205], [800, 205], [800, 128], [830, 128]], stage: 6, label: [672, 199] },
+  { id: 'and_mux', pts: [[860, 120], [868, 120], [868, 140], [891, 140], [891, 122]], stage: 6 },
   { id: 'inst_ctrl', pts: [[252, 160], [272, 160]], stage: 7 },
   { id: 'inst_aluctrl', pts: [[252, 425], [252, 495], [595, 495], [595, 445]], stage: 7 },
   { id: 'aluctrl_alu', pts: [[595, 405], [595, 335]], stage: 7, ctl: true },
@@ -86,7 +86,7 @@ ACTIVE_COMPS.sub = ACTIVE_COMPS.and = ACTIVE_COMPS.or = ACTIVE_COMPS.add;
 function wireValues(t: CycleTrace): Record<string, string> {
   const v: Record<string, string> = {
     add4_mux: `${t.pcPlus4}`, mux_pc: `next PC = ${t.nextPc}`, rs1: `x${t.instr.rs1}`, rs2: `x${t.instr.rs2}`, rd: `x${t.instr.rd}`,
-    rd1: `${t.readData1}`, rd2_mux: `${t.readData2}`, imm_mux: `${t.imm}`, alu_dm: `${t.aluResult}`, badd_mux: `${t.branchTarget}`, zero_and: `Zero=${t.zero ? 1 : 0}`,
+    rd1: `${t.readData1}`, rd2_mux: `${t.readData2}`, imm_mux: `${t.imm}`, alu_dm: `${t.aluResult}`, badd_mux: `${t.branchTarget}`, zero_and: `= ${t.zero ? 1 : 0}`,
   };
   if (t.writeData !== null) v.wb = `x${t.writeReg} ← ${t.writeData}`;
   if (t.memRead !== null) v.dm_mux = `${t.memRead}`;
@@ -135,12 +135,13 @@ const BOX: Record<CompId, { x: number; y: number; w: number; h: number; shape?: 
 };
 
 const SIGNAL_POS: Record<string, [number, number, CompId]> = {
-  ALUSrc: [494, 378, 'MUXALU'], MemtoReg: [850, 360, 'MUXWB'], PCSrc: [905, 135, 'MUXPC'], RegWrite: [365, 205, 'RF'],
-  MemRead: [735, 388, 'DM'], MemWrite: [735, 235, 'DM'], Branch: [700, 145, 'AND'], ALUOp: [520, 458, 'ALUCTRL'],
+  ALUSrc: [494, 378, 'MUXALU'], MemtoReg: [850, 360, 'MUXWB'], PCSrc: [905, 156, 'MUXPC'], RegWrite: [365, 205, 'RF'],
+  MemRead: [735, 388, 'DM'], MemWrite: [735, 233, 'DM'], Branch: [700, 145, 'AND'], ALUOp: [520, 458, 'ALUCTRL'],
 };
 
 export default function Datapath({ op = null, trace = null, maxStage = 7, selected = null, onSelect, showControl = true, animate = true, signals, focusSignal, limit = null }: Props) {
   const all = activeWires(op);
+  if (trace?.pcSrc === 1) all.delete('add4_mux'); // MUX selects the branch target, so PC + 4 is not used
   const act = limit ? new Set([...all].filter((w) => limit.includes(w))) : all;
   const actC = new Set(op ? ACTIVE_COMPS[op] : []);
   const vals = trace ? wireValues(trace) : {};
@@ -159,7 +160,7 @@ export default function Datapath({ op = null, trace = null, maxStage = 7, select
         return (
           <g key={w.id}>
             <path d={d} fill="none" className="wire" stroke={color} strokeWidth={on ? 2.6 : 1.3} opacity={op && !on ? 0.35 : 1} strokeDasharray={w.ctl ? '4 3' : undefined} markerEnd={w.id === 'bus' ? undefined : on ? 'url(#arrA)' : 'url(#arr)'} />
-            {on && animate && !w.ctl && <path d={d} fill="none" stroke="rgb(var(--teal))" strokeWidth={2.6} className="flow" opacity={0.9} />}
+            {on && animate && !w.ctl && <path d={d} fill="none" stroke="rgb(var(--bg))" strokeWidth={1.2} className="flow" opacity={0.55} />}
             {on && w.label && vals[w.id] && (
               <text x={w.label[0]} y={w.label[1]} fontSize="11" fontFamily="JetBrains Mono" fill="rgb(var(--ink))" className="pointer-events-none">
                 <tspan style={{ paintOrder: 'stroke' }} stroke="rgb(var(--bg))" strokeWidth={3}>{vals[w.id]}</tspan>
@@ -186,7 +187,7 @@ export default function Datapath({ op = null, trace = null, maxStage = 7, select
           const { x, y, w, h } = b;
           shape = <path d={`M${x},${y} L${x + w / 2},${y} A${w / 2},${h / 2} 0 0 1 ${x + w / 2},${y + h} L${x},${y + h} Z`} fill={fill} stroke={stroke} strokeWidth={sw} />;
         } else shape = <rect x={b.x} y={b.y} width={b.w} height={b.h} rx={8} fill={fill} stroke={stroke} strokeWidth={sw} />;
-        const ty = b.y + b.h / 2 - (b.label.length - 1) * 7 + 4;
+        const ty = c.id === 'DM' ? b.y + 24 : b.y + b.h / 2 - (b.label.length - 1) * 7 + 4;
         return (
           <g key={c.id} data-click tabIndex={onSelect ? 0 : -1} role={onSelect ? 'button' : undefined} aria-label={c.name}
             onClick={() => onSelect?.(c.id)} onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && onSelect) { e.preventDefault(); onSelect(c.id); } }}
@@ -202,10 +203,10 @@ export default function Datapath({ op = null, trace = null, maxStage = 7, select
       {vis(2) && (
         <g fontSize="9" fill="rgb(var(--muted))" fontFamily="JetBrains Mono" className="pointer-events-none">
           <text x={334} y={242}>Read reg 1</text><text x={334} y={270}>Read reg 2</text><text x={334} y={300}>Write reg</text><text x={334} y={330}>Write data</text>
-          <text x={402} y={254}>Read data 1</text><text x={402} y={322}>Read data 2</text>
-          {vis(5) && <><text x={704} y={294}>Address</text><text x={704} y={349}>Write data</text><text x={768} y={304}>Read data</text></>}
-          <text x={222} y={274}>[31:0]</text>
-          {vis(3) && <text x={600} y={246}>Zero</text>}
+          <text x={455} y={254} textAnchor="end">Read data 1</text><text x={455} y={322} textAnchor="end">Read data 2</text>
+          {vis(5) && <><text x={704} y={294}>Address</text><text x={704} y={349}>Write data</text><text x={815} y={304} textAnchor="end">Read data</text></>}
+          <text x={221} y={279} fontSize={8}>[31:0]</text>
+          {vis(3) && <text x={634} y={244}>Zero</text>}
           {vis(4) && <><text x={515} y={313}>0</text><text x={515} y={350}>1</text></>}
           {vis(5) && <><text x={864} y={300}>0</text><text x={864} y={332}>1</text></>}
           {vis(6) && <><text x={884} y={78}>0</text><text x={884} y={108}>1</text></>}

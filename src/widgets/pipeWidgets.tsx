@@ -151,10 +151,10 @@ export function BranchLab() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <Stat label="Branches" value={sim.length} />
         <Stat label="Correct" value={correct} tone="ok" />
-        <Stat label="Accuracy" value={sim.length ? `${((correct / sim.length) * 100).toFixed(0)}%` : '—'} tone="accent" />
+        <Stat label="Accuracy" value={sim.length ? `${((correct / sim.length) * 100).toFixed(0)}%` : '-'} tone="accent" />
         <Stat label="Wasted cycles" value={wasted} tone={wasted ? 'bad' : 'ok'} />
       </div>
-      <p className="text-xs text-muted">P = prediction, A = actual. Each misprediction flushes the wrongly fetched instruction(s) — {penalty} cycle(s) in the lecture’s pipeline with the branch resolved in ID. 1-bit and 2-bit counters are standard implementations of “record recent history” (background beyond the slide).</p>
+      <p className="text-xs text-muted">P = prediction, A = actual. Each misprediction flushes the wrongly fetched instruction(s), costing {penalty} cycle(s) in the lecture’s pipeline with the branch resolved in ID. 1-bit and 2-bit counters are standard implementations of “record recent history” (background beyond the slide).</p>
     </div>
   );
 }
@@ -175,8 +175,8 @@ export const PROGRAMS = {
 export function SchedulingLab() {
   return (
     <div className="grid 2xl:grid-cols-2 gap-6">
-      <PipelineRunner title="Original order (slide 48) — expect 13 cycles" {...PROGRAMS.original} show={{ options: ['forwarding'] }} />
-      <PipelineRunner title="Scheduled order — expect 11 cycles" {...PROGRAMS.scheduled} show={{ options: ['forwarding'] }} />
+      <PipelineRunner title="Original order (slide 48), expect 13 cycles" {...PROGRAMS.original} show={{ options: ['forwarding'] }} />
+      <PipelineRunner title="Scheduled order, expect 11 cycles" {...PROGRAMS.scheduled} show={{ options: ['forwarding'] }} />
     </div>
   );
 }

@@ -26,7 +26,7 @@ export function Inspector({ id }: { id: CompId | null }) {
       <p className="leading-relaxed">{c.role}</p>
       <div><span className="text-xs uppercase text-muted">Inputs</span><div>{c.inputs}</div></div>
       <div><span className="text-xs uppercase text-muted">Outputs</span><div>{c.outputs}</div></div>
-      <div className="text-xs text-muted">Used by: {OPS.filter((o) => ACTIVE_COMPS[o].includes(c.id)).join(', ') || '—'} · Lecture slides {c.slides}</div>
+      <div className="text-xs text-muted">Used by: {OPS.filter((o) => ACTIVE_COMPS[o].includes(c.id)).join(', ') || '-'} · Lecture slides {c.slides}</div>
     </div>
   );
 }
@@ -77,7 +77,7 @@ export function Progressive() {
       <div className="grid lg:grid-cols-[1fr_260px] gap-3">
         <Datapath op={can ? op : null} trace={can ? t : null} maxStage={stage} showControl={stage >= 7} selected={sel} onSelect={setSel} />
         <div className="card p-3 space-y-3">
-          <div className={`text-sm ${can ? 'text-ok' : 'text-warn'}`}>{can ? `✓ This datapath can execute ${op}.` : `✗ ${op} cannot execute yet — it needs step ${supported[op]}.`}</div>
+          <div className={`text-sm ${can ? 'text-ok' : 'text-warn'}`}>{can ? `✓ This datapath can execute ${op}.` : `✗ ${op} cannot execute yet. It needs step ${supported[op]}.`}</div>
           <Inspector id={sel} />
         </div>
       </div>
@@ -163,7 +163,7 @@ export function CriticalPath() {
           <div className={`w-28 font-mono text-xs ${tot[i] === max ? 'text-warn font-bold' : ''}`}>{tot[i]} ps{tot[i] === max ? ' ← critical' : ` (idle ${max - tot[i]})`}</div>
         </div>
       ))}
-      <p>Single-cycle clock period = <b>{max} ps</b>. Every instruction pays it, even when it finishes earlier — the idle time is wasted.</p>
+      <p>Single-cycle clock period = <b>{max} ps</b>. Every instruction pays it, even when it finishes earlier, so the idle time is wasted.</p>
     </div>
   );
 }

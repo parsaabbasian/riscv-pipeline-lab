@@ -24,7 +24,7 @@ export function PracticePage() {
       <div><div className="text-xs font-semibold uppercase tracking-wider text-accent mb-1">Practice</div><h1 className="text-2xl sm:text-3xl font-bold">Practice & Quizzes</h1></div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <Stat label="Questions" value={QUESTIONS.length} /><Stat label="Attempted" value={tried.length} /><Stat label="Correct" value={right} tone="ok" />
-        <Stat label="Accuracy" value={tried.length ? `${Math.round((right / tried.length) * 100)}%` : '—'} tone="accent" />
+        <Stat label="Accuracy" value={tried.length ? `${Math.round((right / tried.length) * 100)}%` : '-'} tone="accent" />
       </div>
       <Card title="Generated problem (answer computed by the simulator)" actions={<button className="btn !text-xs" onClick={() => setSeed(seed + 1)}><Shuffle className="w-3.5 h-3.5" />New problem</button>}>
         <QuestionCard key={gen.id} q={gen} record={false} />
@@ -37,7 +37,7 @@ export function PracticePage() {
         <Segmented label="Show" value={view} onChange={setView} options={[{ value: 'all', label: 'All' }, { value: 'wrong', label: 'Review incorrect' }]} />
         <button className="btn !text-xs ml-auto" onClick={() => { if (confirm('Reset all progress and quiz results?')) reset(); }}><RotateCcw className="w-3.5 h-3.5" />Reset progress</button>
       </div>
-      {list.length === 0 && <div className="text-muted text-sm">No questions match{view === 'wrong' ? ' — no incorrect answers to review.' : '.'}</div>}
+      {list.length === 0 && <div className="text-muted text-sm">No questions match{view === 'wrong' ? '. You have no incorrect answers to review.' : '.'}</div>}
       <div className="grid lg:grid-cols-2 gap-3">{list.map((q, i) => <QuestionCard key={q.id} q={q} index={i} />)}</div>
     </div>
   );
@@ -84,7 +84,7 @@ export function ExamPage() {
           <div className="text-xs text-muted mt-2">ALU control: AND 0000 · OR 0001 · add 0010 · subtract 0110</div>
         </Card>
       </div>
-      <Card title="Final comprehensive assessment" actions={started && <span className="text-sm font-mono">{score}/{n} correct · {n}/{exam.length} answered</span>}>
+      <Card title="Final assessment" actions={started && <span className="text-sm font-mono">{score}/{n} correct · {n}/{exam.length} answered</span>}>
         {!started ? (
           <div className="space-y-3">
             <p className="text-sm text-muted">{exam.length} questions: two from each module plus two generated multi-step problems. Results feed your mastery indicators.</p>

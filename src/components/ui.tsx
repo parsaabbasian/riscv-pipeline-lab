@@ -57,7 +57,7 @@ export function Callout({ kind = 'info', title, children }: { kind?: keyof typeo
 }
 
 export function SlideRef({ s }: { s: string }) {
-  return <span className="chip bg-accent/10 text-accent font-mono" title="Lecture 8 slide reference">slide {s}</span>;
+  return <span className="chip bg-accent/10 text-accent font-mono" title="Lecture slide reference">slide {s}</span>;
 }
 
 export const STAGE_COLOR: Record<string, string> = { IF: 'bg-sif', ID: 'bg-sid', EX: 'bg-sex', MEM: 'bg-smem', WB: 'bg-swb' };

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { NavLink, Route, Routes, useLocation, Link } from 'react-router-dom';
 import { BookOpen, Cpu, GitBranch, Home, Layers, Menu, Moon, Sun, X, Gauge, ListChecks, GraduationCap, Search, Table2, AlertTriangle, Library } from 'lucide-react';
 import { useApp, type Mode } from './store';
-import { ALL_TOPICS, MODULES } from './content/modules';
+import { ALL_TOPICS, LECTURES, MODULES, lectureOf } from './content/modules';
 import { Segmented } from './components/ui';
 import { HomePage, Curriculum, LessonPage, ExplorerPage, PipelinePage, HazardPage, PerfPage, GlossaryPage, CoveragePage, NotFound } from './pages/pages';
 import { PracticePage, ExamPage } from './pages/quizPages';
@@ -30,8 +30,9 @@ function Sidebar({ onNav }: { onNav?: () => void }) {
           <n.icon className="w-4 h-4" />{n.label}
         </NavLink>
       ))}
-      <div className="mt-4 mb-1 px-2.5 text-[11px] uppercase tracking-wider text-muted">Modules</div>
-      {MODULES.map((m) => {
+      {LECTURES.map((l) => <div key={l.n} className="contents">
+      <div className="mt-4 mb-1 px-2.5 text-[11px] uppercase tracking-wider text-muted">Lecture {l.n} · {l.title}</div>
+      {MODULES.filter((m) => lectureOf(m) === l.n).map((m) => {
         const done = m.topics.filter((t) => completed[t.id]).length;
         return (
           <NavLink key={m.id} to={`/lesson/${m.id}`} onClick={onNav}
@@ -41,6 +42,7 @@ function Sidebar({ onNav }: { onNav?: () => void }) {
           </NavLink>
         );
       })}
+      </div>)}
     </nav>
   );
 }
@@ -56,7 +58,7 @@ function GlobalSearch() {
         <div className="absolute top-10 left-0 w-80 card shadow-xl z-50 p-1">
           {hits.map((h) => (
             <Link key={h.id} to={`/lesson/${h.module.id}#${h.id}`} onClick={() => setQ('')} className="block px-3 py-2 rounded-lg hover:bg-raised text-sm">
-              <div className="font-medium">{h.title}</div><div className="text-xs text-muted">Module {h.module.n} · slides {h.slides}</div>
+              <div className="font-medium">{h.title}</div><div className="text-xs text-muted">Lecture {lectureOf(h.module)} · Module {h.module.n} · slides {h.slides}</div>
             </Link>
           ))}
         </div>
@@ -84,7 +86,7 @@ export default function App() {
           <span className="w-7 h-7 rounded-lg bg-accent text-white flex items-center justify-center"><GitBranch className="w-4 h-4" /></span>
           <span className="hidden sm:inline whitespace-nowrap">RISC-V Pipeline Lab</span>
         </Link>
-        <span className="chip bg-raised text-muted hidden md:inline-flex whitespace-nowrap">Lecture 8</span>
+        <span className="chip bg-raised text-muted hidden md:inline-flex whitespace-nowrap">Lectures 8–9</span>
         <div className="flex-1" />
         <GlobalSearch />
         <div className="hidden lg:flex items-center gap-2 text-xs text-muted" title="Lessons completed">

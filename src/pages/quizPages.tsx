@@ -31,7 +31,7 @@ export function PracticePage() {
       </Card>
       <div className="flex flex-wrap gap-2 items-center">
         <select className="input !w-auto !font-sans" value={mod} onChange={(e) => setMod(e.target.value)} aria-label="Module filter">
-          <option value="all">All modules</option>{MODULES.map((m) => <option key={m.id} value={m.id}>M{m.n} {m.title}</option>)}
+          <option value="all">All modules</option>{MODULES.map((m) => <option key={m.id} value={m.id}>L{m.lecture ?? 8} · M{m.n} {m.title}</option>)}
         </select>
         <Segmented label="Difficulty" value={diff} onChange={setDiff} options={[{ value: 'all', label: 'All' }, { value: '1', label: 'Easy' }, { value: '2', label: 'Medium' }, { value: '3', label: 'Hard' }]} />
         <Segmented label="Show" value={view} onChange={setView} options={[{ value: 'all', label: 'All' }, { value: 'wrong', label: 'Review incorrect' }]} />

@@ -3,6 +3,7 @@ import { AluCtrlSim, BranchCalc, ClockSim, Formats, GatesSim, ImmGenSim, InstrWa
 import { ControlDashboard, CpuClick, CriticalPath, Progressive, SingleVsMulti } from './datapathWidgets';
 import { BranchLab, Laundry, PerfCalc, PROGRAMS, SchedulingLab } from './pipeWidgets';
 import PipelineRunner from './PipelineRunner';
+import { BranchHazard, DualIssueLab, ExceptionLab, ForwardUnit, HazardUnit, OoOLab, PipeControl, PredictorLab } from './l9Widgets';
 
 export const WIDGETS: Record<WidgetKey, { title: string; render: () => JSX.Element }> = {
   instrWalk: { title: 'Instruction walkthrough', render: () => <InstrWalk /> },
@@ -31,4 +32,14 @@ export const WIDGETS: Record<WidgetKey, { title: string; render: () => JSX.Eleme
   pipeDatapath: { title: 'Pipelined datapath (ld/sd)', render: () => <PipelineRunner {...PROGRAMS.ldsd} show={{ datapath: true, options: ['forwarding'] }} /> },
   pipeRegs: { title: 'Pipeline registers', render: () => <PipelineRunner {...PROGRAMS.ldsd} show={{ datapath: true, options: [] , editor: false }} /> },
   wrongReg: { title: 'Wrong register number', render: () => <PipelineRunner {...PROGRAMS.wrong} opts={{ buggyWriteRegister: true }} show={{ datapath: true, options: ['buggyWriteRegister'] }} /> },
+  fwdUnit: { title: 'Forwarding unit', render: () => <ForwardUnit /> },
+  hazardUnit: { title: 'Hazard detection unit', render: () => <><HazardUnit /><div className="h-4" /><PipelineRunner {...PROGRAMS.loadUse} show={{ options: ['forwarding'] }} /></> },
+  pipeControl: { title: 'Pipelined control signals', render: () => <PipeControl /> },
+  hazardMix: { title: 'Forwarding in the slide 19 sequence', render: () => <PipelineRunner {...PROGRAMS.hazardMix} show={{ options: ['forwarding'] }} /> },
+  doubleHazard: { title: 'Double data hazard', render: () => <><ForwardUnit /><div className="h-4" /><PipelineRunner program={'add x1, x1, x2\nadd x1, x1, x3\nadd x1, x1, x4'} regs="x1=1, x2=10, x3=100, x4=1000" show={{ options: ['forwarding'] }} /></> },
+  branchHazard: { title: 'Data hazards for branches', render: () => <BranchHazard /> },
+  predictor: { title: '1-bit vs 2-bit predictor', render: () => <><PredictorLab /><div className="h-6" /><BranchLab /></> },
+  exception: { title: 'Exception in the pipeline', render: () => <ExceptionLab /> },
+  dualIssue: { title: 'Static dual issue', render: () => <DualIssueLab /> },
+  ooo: { title: 'Dynamic scheduling', render: () => <OoOLab /> },
 };

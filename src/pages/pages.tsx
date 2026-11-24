@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, Circle, Cpu, Layers, AlertTriangle, Gauge, ListChecks, BookOpen, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
-import { ALL_TOPICS, MODULES, type Topic } from '../content/modules';
+import { ALL_TOPICS, LECTURES, MODULES, lectureOf, type Lecture, type Topic } from '../content/modules';
 import { QUESTIONS } from '../content/quiz';
 import { GLOSSARY } from '../content/glossary';
 import { coverage } from '../content/coverage';
@@ -50,9 +50,9 @@ export function HomePage() {
   return (
     <div className="space-y-8">
       <div className="card p-6 sm:p-8 relative overflow-hidden">
-        <div className="text-xs font-semibold uppercase tracking-wider text-accent mb-2">Lecture 8 · Computer Organization and Design RISC-V</div>
+        <div className="text-xs font-semibold uppercase tracking-wider text-accent mb-2">Lectures 8–9 · Computer Organization and Design RISC-V</div>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight max-w-2xl">From one instruction to a five-stage pipeline.</h1>
-        <p className="text-muted mt-3 max-w-2xl leading-relaxed">Ten modules covering slides 1–61: logic and clocking, the single-cycle datapath and its control, multicycle design, pipelining, hazards, branch prediction and the pipelined datapath. The simulators calculate their results from the program you give them.</p>
+        <p className="text-muted mt-3 max-w-2xl leading-relaxed">Eighteen modules. Lecture 8 (slides 1–61): logic and clocking, the single-cycle datapath and its control, multicycle design, pipelining and the pipelined datapath. Lecture 9 (slides 1–72): pipelined control, forwarding and stalls, branch hazards and prediction, exceptions, and multiple issue. The simulators calculate their results from the program you give them.</p>
         <div className="flex flex-wrap gap-2 mt-5">
           <Link to={`/lesson/${resume.module.id}#${resume.id}`} className="btn btn-primary">{done ? 'Continue' : 'Start'}: {resume.title}<ArrowRight className="w-4 h-4" /></Link>
           <Link to="/pipeline" className="btn">Open the pipeline simulator</Link>
@@ -141,10 +141,10 @@ export function Curriculum() {
   const completed = useApp((s) => s.completed);
   return (
     <div>
-      <PageHead kicker="Course" title="Curriculum">Ten modules mapped to the 61 slides of Lecture 8. Topics marked <span className="chip bg-raised">background</span> are supporting material not taught directly on the slides.</PageHead>
+      <PageHead kicker="Course" title="Curriculum">Modules 1–10 map to the 61 slides of Lecture 8, modules 11–18 to the 72 slides of Lecture 9. Topics marked <span className="chip bg-raised">background</span> are supporting material not taught directly on the slides.</PageHead>
       <div className="space-y-3">
         {MODULES.map((m) => (
-          <Card key={m.id} title={<Link to={`/lesson/${m.id}`} className="hover:text-accent">Module {m.n} · {m.title}</Link>} actions={<SlideRef s={m.slides} />}>
+          <Card key={m.id} title={<Link to={`/lesson/${m.id}`} className="hover:text-accent">L{lectureOf(m)} · Module {m.n} · {m.title}</Link>} actions={<SlideRef s={m.slides} />}>
             <p className="text-sm text-muted mb-3">{m.blurb}</p>
             <div className="grid md:grid-cols-2 gap-1">
               {m.topics.map((t) => (
@@ -245,7 +245,7 @@ export function LessonPage() {
   return (
     <div className="grid xl:grid-cols-[1fr_280px] gap-6">
       <div className="space-y-5 min-w-0">
-        <PageHead kicker={`Module ${m.n} · Slides ${m.slides}`} title={m.title}>{m.blurb}</PageHead>
+        <PageHead kicker={`Lecture ${lectureOf(m)} · Module ${m.n} · Slides ${m.slides}`} title={m.title}>{m.blurb}</PageHead>
         {mode === 'beginner' && <Callout kind="tip" title="Beginner mode">Every term is introduced before use, analogies are shown, and interactive diagrams are open. Switch to Exam mode in the top bar for a condensed review.</Callout>}
         {mode === 'exam' && <Callout kind="info" title="Exam mode">Only technical summaries, formulas, RISC-V examples, checks and exam points are shown. Diagrams are collapsed; open them when you need them.</Callout>}
         {m.topics.map((t) => <TopicView key={t.id} t={t} />)}
@@ -362,13 +362,16 @@ export function GlossaryPage() {
 }
 
 export function CoveragePage() {
-  const rows = coverage();
+  const [lec, setLec] = useState<Lecture>(9);
+  const rows = coverage(lec);
+  const total = LECTURES.find((l) => l.n === lec)!.slides;
   const completed = useApp((s) => s.completed);
   const covered = rows.filter((r) => r.status === 'covered').length;
   return (
     <div>
-      <PageHead kicker="Validation" title="Slide Coverage Matrix">{covered}/61 slides are mapped to at least one lesson topic.</PageHead>
-      <div className="mb-4"><Callout kind="warn" title="Source note">The lecture PDF was not available when this app was built. Slide-to-topic mapping follows the slide ranges in the course brief (modules 1–10) and the standard Patterson &amp; Hennessy RISC-V Chapter 4 deck. Check individual slide titles and examples against your PDF.</Callout></div>
+      <PageHead kicker="Validation" title="Slide Coverage Matrix">{covered}/{total} slides of Lecture {lec} are mapped to at least one lesson topic.</PageHead>
+      <div className="mb-4 flex gap-2">{LECTURES.map((l) => <button key={l.n} className={`btn ${lec === l.n ? 'btn-primary' : ''}`} onClick={() => setLec(l.n)}>Lecture {l.n}</button>)}</div>
+      {lec === 8 && <div className="mb-4"><Callout kind="warn" title="Source note">The lecture PDF was not available when this app was built. Slide-to-topic mapping follows the slide ranges in the course brief (modules 1–10) and the standard Patterson &amp; Hennessy RISC-V Chapter 4 deck. Check individual slide titles and examples against your PDF.</Callout></div>}
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-xs text-muted text-left border-b border-line"><tr>{['Slide', 'Module', 'Lesson topic(s)', 'Interactive visualisation', 'Practice', 'Status'].map((h) => <th key={h} className="px-3 py-2 font-medium">{h}</th>)}</tr></thead>

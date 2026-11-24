@@ -1,7 +1,9 @@
+import { L9_MODULES } from './modulesL9';
 export type WidgetKey =
   | 'instrWalk' | 'cpuClick' | 'mux' | 'gates' | 'register' | 'clock' | 'progressive' | 'immgen' | 'branchCalc'
   | 'control' | 'aluctrl' | 'criticalPath' | 'singleVsMulti' | 'laundry' | 'pipeTiming' | 'perfCalc' | 'formats'
-  | 'structural' | 'hazard' | 'loadUse' | 'scheduling' | 'branchStall' | 'branchLab' | 'pipeDatapath' | 'wrongReg' | 'pipeRegs';
+  | 'structural' | 'hazard' | 'loadUse' | 'scheduling' | 'branchStall' | 'branchLab' | 'pipeDatapath' | 'wrongReg' | 'pipeRegs'
+  | 'fwdUnit' | 'hazardUnit' | 'pipeControl' | 'hazardMix' | 'doubleHazard' | 'branchHazard' | 'predictor' | 'exception' | 'dualIssue' | 'ooo';
 
 export interface Check { q: string; options: string[]; answer: number; why: string; wrong: string[] }
 export interface Topic {
@@ -12,9 +14,10 @@ export interface Topic {
   check: Check; exam: string[]; mistakes: string[];
   background?: boolean;
 }
-export interface Module { id: string; n: number; title: string; slides: string; blurb: string; topics: Topic[] }
+export type Lecture = 8 | 9;
+export interface Module { id: string; n: number; title: string; slides: string; blurb: string; topics: Topic[]; lecture?: Lecture }
 
-export const MODULES: Module[] = [
+const L8_MODULES: Module[] = [
   {
     id: 'm1', n: 1, title: 'CPU Basics & Instruction Execution', slides: '1–3',
     blurb: "What a processor actually does with one instruction: read it, find the numbers it needs, do the math, and move on to the next one.",
@@ -519,5 +522,12 @@ export const MODULES: Module[] = [
     ],
   },
 ];
+
+export const LECTURES: { n: Lecture; title: string; slides: number }[] = [
+  { n: 8, title: 'Pipeline Concept', slides: 61 },
+  { n: 9, title: 'Hazards, Exceptions', slides: 72 },
+];
+export const MODULES: Module[] = [...L8_MODULES.map((m) => ({ ...m, lecture: 8 as Lecture })), ...L9_MODULES.map((m) => ({ ...m, lecture: 9 as Lecture }))];
+export const lectureOf = (m: Module): Lecture => m.lecture ?? 8;
 
 export const ALL_TOPICS = MODULES.flatMap((m) => m.topics.map((t) => ({ ...t, module: m })));
